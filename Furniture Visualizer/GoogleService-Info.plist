@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>494740460204-u0i54a458g8t6mp484qo8jiuf44b82j2.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.494740460204-u0i54a458g8t6mp484qo8jiuf44b82j2</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDdL2SYN9X-KdpBlotOpeQQ_2RlJXW3ESM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>494740460204</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>vineet0713.Furniture-Visualizer</string>
+	<key>PROJECT_ID</key>
+	<string>furniture-visualizer-df484</string>
+	<key>STORAGE_BUCKET</key>
+	<string>furniture-visualizer-df484.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:494740460204:ios:e56bd1405fc04fa9464509</string>
+	<key>DATABASE_URL</key>
+	<string>https://furniture-visualizer-df484.firebaseio.com</string>
+</dict>
+</plist>

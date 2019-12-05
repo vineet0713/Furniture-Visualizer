@@ -1,0 +1,6 @@
+framework module Pods_Furniture_Visualizer {
+  umbrella header "Pods-Furniture Visualizer-umbrella.h"
+
+  export *
+  module * { export * }
+}
