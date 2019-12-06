@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4222F3D5A5DD5F5AA61FFB5A /* Pods_Furniture_Visualizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF1B8EA213950730E5B16242 /* Pods_Furniture_Visualizer.framework */; };
-		65B6763C23998FF80007A21B /* VirtualPlane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B6763B23998FF80007A21B /* VirtualPlane.swift */; };
 		65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BA239981A2008D8A50 /* AppDelegate.swift */; };
 		65C164BD239981A2008D8A50 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BC239981A2008D8A50 /* SceneDelegate.swift */; };
 		65C164C2239981A2008D8A50 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 65C164C0239981A2008D8A50 /* Main.storyboard */; };
@@ -21,7 +20,6 @@
 
 /* Begin PBXFileReference section */
 		076DEEE9087D307FD74A4AF8 /* Pods-Furniture Visualizer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.release.xcconfig"; path = "Pods/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.release.xcconfig"; sourceTree = "<group>"; };
-		65B6763B23998FF80007A21B /* VirtualPlane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualPlane.swift; sourceTree = "<group>"; };
 		65C164B7239981A2008D8A50 /* Furniture Visualizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Furniture Visualizer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65C164BA239981A2008D8A50 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65C164BC239981A2008D8A50 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -91,7 +89,6 @@
 				65C164C0239981A2008D8A50 /* Main.storyboard */,
 				65C164CE2399820E008D8A50 /* LoginViewController.swift */,
 				65C164D0239984FC008D8A50 /* ARKitViewController.swift */,
-				65B6763B23998FF80007A21B /* VirtualPlane.swift */,
 				65C164C3239981A4008D8A50 /* Assets.xcassets */,
 				65C164C5239981A4008D8A50 /* LaunchScreen.storyboard */,
 				65FD43EE2399899800E805E6 /* GoogleService-Info.plist */,
@@ -229,7 +226,6 @@
 			files = (
 				65C164CF2399820E008D8A50 /* LoginViewController.swift in Sources */,
 				65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */,
-				65B6763C23998FF80007A21B /* VirtualPlane.swift in Sources */,
 				65C164D1239984FC008D8A50 /* ARKitViewController.swift in Sources */,
 				65C164BD239981A2008D8A50 /* SceneDelegate.swift in Sources */,
 			);

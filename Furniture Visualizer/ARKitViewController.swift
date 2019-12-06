@@ -16,8 +16,12 @@ class ARKitViewController: UIViewController {
     // MARK: - Properties
     
     var sceneView: ARSCNView!
-    var planes = [UUID : VirtualPlane]()
     var currentSceneURL: URL?
+    
+    enum BodyType: Int {
+        case ObjectModel = 2
+    }
+    var currentAngleY: Float = 0.0
     
     // MARK: - UIViewController Life Cycle Functions
     
@@ -25,6 +29,7 @@ class ARKitViewController: UIViewController {
         super.viewDidLoad()
         
         setupSceneView()
+        registerGestureRecognizers()
         setupLogoutButton()
         loadModelsFromFirebase()
     }
@@ -52,15 +57,6 @@ class ARKitViewController: UIViewController {
 // MARK: - Extension: Setup the UI
 extension ARKitViewController {
     
-    func setupLogoutButton() {
-        let logoutButton = UIButton(frame: CGRect(x: 100, y: 100, width: 100, height: 50))
-        let defaultColor = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
-        logoutButton.setTitleColor(defaultColor, for: .normal)
-        logoutButton.setTitle("Logout", for: .normal)
-        logoutButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
-        view.addSubview(logoutButton)
-    }
-    
     func setupSceneView() {
         sceneView = ARSCNView()
         view.addSubview(sceneView)
@@ -85,10 +81,6 @@ extension ARKitViewController {
         
         // Set the scene to the view
         sceneView.scene = scene
-        
-        // Add a tap gesture recognizer (for adding models to sceneView)
-        let recognizer = UITapGestureRecognizer(target: self, action: #selector(addCouchToSceneView(withGestureRecognizer:)))
-        sceneView.addGestureRecognizer(recognizer)
     }
     
     func addConstraintsToSceneView() {
@@ -97,6 +89,33 @@ extension ARKitViewController {
         sceneView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
         sceneView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
         sceneView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+    }
+    
+    func registerGestureRecognizers() {
+        // Add a tap gesture recognizer (for adding models to sceneView)
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        self.sceneView.addGestureRecognizer(tapGestureRecognizer)
+        
+        // Add a pan gesture recognizer (for moving the models)
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+        self.sceneView.addGestureRecognizer(panGestureRecognizer)
+        
+        // Add a pinch gesture recognizer (for resizing the models)
+        let pinchGestureRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch))
+        self.sceneView.addGestureRecognizer(pinchGestureRecognizer)
+        
+        // Add a rotation gesture recognizer (for rotating the models)
+        let rotationGestureRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation))
+        self.sceneView.addGestureRecognizer(rotationGestureRecognizer)
+    }
+    
+    func setupLogoutButton() {
+        let logoutButton = UIButton(frame: CGRect(x: 100, y: 100, width: 100, height: 50))
+        let defaultColor = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
+        logoutButton.setTitleColor(defaultColor, for: .normal)
+        logoutButton.setTitle("Logout", for: .normal)
+        logoutButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
+        view.addSubview(logoutButton)
     }
     
 }
@@ -145,33 +164,86 @@ extension ARKitViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
-    @objc func addCouchToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
-        let tapLocation = recognizer.location(in: sceneView)
-        let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
+    @objc func handleTap(recognizer: UITapGestureRecognizer) {
+        guard let recognizerView = recognizer.view as? ARSCNView else {
+            print("recognizerView was not able to be initialized!")
+            return
+        }
         
-        // Translates the hitTestResults to x/y/z coordinates for the tapped location
-        guard let hitTestResult = hitTestResults.first else {
+        let touch = recognizer.location(in: recognizerView)
+        guard let hitTestResult = recognizerView.hitTest(touch, types: .existingPlane).first else {
             print("hitTestResult was not able to be initialized!")
             return
         }
-        let translation = hitTestResult.worldTransform.columns.3
-        let x = translation.x
-        let y = translation.y
-        let z = translation.z
         
-        // Initializes the couchNode and adds it to sceneView
-        guard let sceneURL = currentSceneURL else {
-            print("currentSceneURL is nil!")
+        let couchAnchor = ARAnchor(name: "couch", transform: hitTestResult.worldTransform)
+        sceneView.session.add(anchor: couchAnchor)
+    }
+    
+    @objc func handlePan(recognizer: UIPanGestureRecognizer) {
+        guard recognizer.state == .changed else {
+            print("recognizer.state is not changed, so we don't need to do anything")
             return
         }
-        let couchScene = try? SCNScene(url: sceneURL, options: nil)
-        guard let couchNode = couchScene?.rootNode.childNode(withName: "couchModel", recursively: true) else {
-            print("couchNode was not able to be initialized!")
+        
+        guard let touch = getTouchPoint(from: recognizer),
+              let modelNodeHit = getModelNodeHit(from: recognizer, using: touch)
+        else {
+            print("modelNodeHit is nil!")
             return
         }
-        couchNode.position = SCNVector3(x,y,z)
-        couchNode.scale = SCNVector3(0.75, 0.75, 0.75)
-        sceneView.scene.rootNode.addChildNode(couchNode)
+        
+        let hitTestPlane = self.sceneView.hitTest(touch, types: .existingPlane)
+        guard let planeHit = hitTestPlane.first else {
+            print("hitTestPlane.first is nil!")
+            return
+        }
+        
+        modelNodeHit.position = SCNVector3(
+            planeHit.worldTransform.columns.3.x,
+            // planeHit.worldTransform.columns.3.y,
+            modelNodeHit.position.y,
+            planeHit.worldTransform.columns.3.z
+        )
+    }
+    
+    @objc func handlePinch(recognizer: UIPinchGestureRecognizer) {
+        guard recognizer.state == .changed else {
+            print("recognizer.state is not changed, so we don't need to do anything")
+            return
+        }
+        
+        guard let touch = getTouchPoint(from: recognizer),
+              let modelNodeHit = getModelNodeHit(from: recognizer, using: touch)
+        else {
+            print("modelNodeHit is nil!")
+            return
+        }
+        
+        let pinchScaleX: CGFloat = recognizer.scale * CGFloat((modelNodeHit.scale.x))
+        let pinchScaleY: CGFloat = recognizer.scale * CGFloat((modelNodeHit.scale.y))
+        let pinchScaleZ: CGFloat = recognizer.scale * CGFloat((modelNodeHit.scale.z))
+        
+        modelNodeHit.scale = SCNVector3Make(Float(pinchScaleX), Float(pinchScaleY), Float(pinchScaleZ))
+        recognizer.scale = 1
+    }
+    
+    @objc func handleRotation(recognizer: UIRotationGestureRecognizer) {
+        guard let touch = getTouchPoint(from: recognizer),
+              let modelNodeHit = getModelNodeHit(from: recognizer, using: touch)
+        else {
+            print("modelNodeHit is nil!")
+            return
+        }
+        
+        switch recognizer.state {
+        case .changed:
+            let rotation = Float(recognizer.rotation)
+            modelNodeHit.eulerAngles.y = currentAngleY - rotation
+        default:
+            // for .ended, .cancelled, .failed
+            currentAngleY = modelNodeHit.eulerAngles.y
+        }
     }
     
 }
@@ -179,39 +251,80 @@ extension ARKitViewController {
 // MARK: - Extension: ARSCNViewDelegate Functions
 extension ARKitViewController: ARSCNViewDelegate {
     
+    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+        let rootNode = SCNNode()
+        
+        guard anchor.name == "couch" else {
+            return rootNode
+        }
+        
+        guard let sceneURL = currentSceneURL else {
+            print("currentSceneURL is nil!")
+            return rootNode
+        }
+        let couchScene = try? SCNScene(url: sceneURL, options: nil)
+        guard let couchNode = couchScene?.rootNode.childNode(withName: "couchModel", recursively: true) else {
+            print("couchNode was not able to be initialized!")
+            return rootNode
+        }
+        
+        couchNode.categoryBitMask = BodyType.ObjectModel.rawValue
+        couchNode.enumerateChildNodes { (node, _) in
+            node.categoryBitMask = BodyType.ObjectModel.rawValue
+        }
+        rootNode.addChildNode(couchNode)
+        
+        return rootNode
+    }
+    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        guard let arPlaneAnchor = anchor as? ARPlaneAnchor else {
-            print("arPlaneAnchor was not able to be initialized!")
-            return
+        if anchor is ARPlaneAnchor {
+            print("Plane Detected")
         }
-        let plane = VirtualPlane(anchor: arPlaneAnchor)
-        self.planes[arPlaneAnchor.identifier] = plane
-        node.addChildNode(plane)
     }
     
-    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        guard let arPlaneAnchor = anchor as? ARPlaneAnchor else {
-            print("arPlaneAnchor was not able to be initialized!")
-            return
+}
+
+// MARK: - Extension: Helper Functions
+extension ARKitViewController {
+    
+    // Find the parent node for 3D model
+    func getParentNodeOf(_ nodeFound: SCNNode?) -> SCNNode? {
+        guard let node = nodeFound else {
+            print("nodeFound is nil!")
+            return nil
         }
-        guard let plane = planes[arPlaneAnchor.identifier] else {
-            print("plane was not able to be initialized!")
-            return
+        if node.name == "couchModel" {
+            return node
         }
-        plane.updateWithNewAnchor(arPlaneAnchor)
+        guard let parent = node.parent else {
+            print("node.parent is nil!")
+            return nil
+        }
+        return getParentNodeOf(parent)
     }
     
-    func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
-        guard let arPlaneAnchor = anchor as? ARPlaneAnchor else {
-            print("arPlaneAnchor was not able to be initialized!")
-            return
+    // Get the touch point (CGPoint) from a UIGestureRecognizer
+    func getTouchPoint(from recognizer: UIGestureRecognizer) -> CGPoint? {
+        guard let recognizerView = recognizer.view as? ARSCNView else {
+            print("recognizerView was not able to be initialized!")
+            return nil
         }
-        guard let index = planes.index(forKey: arPlaneAnchor.identifier) else {
-            print("index was not able to be initialized!")
-            return
+        return recognizer.location(in: recognizerView)
+    }
+    
+    // Get the modelNodeHit from a UIGestureRecognizer and a touch point
+    func getModelNodeHit(from recognizer: UIGestureRecognizer, using touchPoint: CGPoint) -> SCNNode? {
+        let hitTestResult = self.sceneView.hitTest(
+            touchPoint,
+            options: [SCNHitTestOption.categoryBitMask: BodyType.ObjectModel.rawValue]
+        )
+        
+        guard let modelNodeHit = getParentNodeOf(hitTestResult.first?.node)?.parent else {
+            print("modelNodeHit was not able to be initialized!")
+            return nil
         }
-        planes.remove(at: index)
-        sceneView.scene.rootNode.removeAllActions()
+        return modelNodeHit
     }
     
 }
