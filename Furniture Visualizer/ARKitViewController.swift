@@ -108,23 +108,31 @@ extension ARKitViewController {
         let storage = Storage.storage()
         let storageRef = storage.reference()
         
+        var url: URL?
         do {
-            let documentsURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            let sceneURL = documentsURL.appendingPathComponent("couch_local.scn")
-            currentSceneURL = sceneURL
-            
-            if FileManager.default.fileExists(atPath: sceneURL.path) {
-                // If the file already exists locally, then we shouldn't load the file from Firebase again
-                print("The file exists already!")
-                return
-            }
-            
-            let downloadTask = storageRef.child("models/couch.scn").write(toFile: sceneURL)
-            downloadTask.observe(.success) { snapshot in
-                print("Download success")
-            }
+            url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         } catch {
+            print("An exception was thrown while trying to initialize url!")
+            return
+        }
+        
+        guard let documentsURL = url else {
             print("documentsURL was not able to be initialized!")
+            return
+        }
+        
+        let sceneURL = documentsURL.appendingPathComponent("couch_local.scn")
+        currentSceneURL = sceneURL
+        
+        if FileManager.default.fileExists(atPath: sceneURL.path) {
+            // If the file already exists locally, then we shouldn't load the file from Firebase again
+            print("The file exists already!")
+            return
+        }
+        
+        let downloadTask = storageRef.child("models/couch.scn").write(toFile: sceneURL)
+        downloadTask.observe(.success) { snapshot in
+            print("The file was successfully downloaded from Firebase")
         }
     }
     
@@ -141,6 +149,7 @@ extension ARKitViewController {
         let tapLocation = recognizer.location(in: sceneView)
         let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
         
+        // Translates the hitTestResults to x/y/z coordinates for the tapped location
         guard let hitTestResult = hitTestResults.first else {
             print("hitTestResult was not able to be initialized!")
             return
@@ -150,19 +159,13 @@ extension ARKitViewController {
         let y = translation.y
         let z = translation.z
         
+        // Initializes the couchNode and adds it to sceneView
         guard let sceneURL = currentSceneURL else {
             print("currentSceneURL is nil!")
             return
         }
-        
-        print(sceneURL.absoluteString)
-        
-        guard let couchScene = SCNScene(named: sceneURL.absoluteString) else {
-            print("couchScene was not able to be initialized!")
-            return
-        }
-        
-        guard let couchNode = couchScene.rootNode.childNode(withName: "couchModel", recursively: true) else {
+        let couchScene = try? SCNScene(url: sceneURL, options: nil)
+        guard let couchNode = couchScene?.rootNode.childNode(withName: "couchModel", recursively: true) else {
             print("couchNode was not able to be initialized!")
             return
         }
