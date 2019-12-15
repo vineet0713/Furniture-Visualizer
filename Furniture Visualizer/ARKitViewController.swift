@@ -31,7 +31,6 @@ class ARKitViewController: UIViewController {
         setupSceneView()
         registerGestureRecognizers()
         setupLogoutButton()
-        loadModelsFromFirebase()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,6 +42,10 @@ class ARKitViewController: UIViewController {
         
         // Run the view's session
         sceneView.session.run(configuration)
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.loadModelsFromFirebase()
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -57,7 +60,7 @@ class ARKitViewController: UIViewController {
 // MARK: - Extension: Setup the UI
 extension ARKitViewController {
     
-    func setupSceneView() {
+    private func setupSceneView() {
         sceneView = ARSCNView()
         view.addSubview(sceneView)
         
@@ -83,7 +86,7 @@ extension ARKitViewController {
         sceneView.scene = scene
     }
     
-    func addConstraintsToSceneView() {
+    private func addConstraintsToSceneView() {
         sceneView.translatesAutoresizingMaskIntoConstraints = false
         sceneView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         sceneView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
@@ -91,7 +94,7 @@ extension ARKitViewController {
         sceneView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
     }
     
-    func registerGestureRecognizers() {
+    private func registerGestureRecognizers() {
         // Add a tap gesture recognizer (for adding models to sceneView)
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         self.sceneView.addGestureRecognizer(tapGestureRecognizer)
@@ -109,7 +112,7 @@ extension ARKitViewController {
         self.sceneView.addGestureRecognizer(rotationGestureRecognizer)
     }
     
-    func setupLogoutButton() {
+    private func setupLogoutButton() {
         let logoutButton = UIButton(frame: CGRect(x: 100, y: 100, width: 100, height: 50))
         let defaultColor = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
         logoutButton.setTitleColor(defaultColor, for: .normal)
@@ -123,7 +126,7 @@ extension ARKitViewController {
 // MARK: - Extension: Firebase
 extension ARKitViewController {
     
-    func loadModelsFromFirebase() {
+    private func loadModelsFromFirebase() {
         let storage = Storage.storage()
         let storageRef = storage.reference()
         
@@ -141,17 +144,19 @@ extension ARKitViewController {
         }
         
         let sceneURL = documentsURL.appendingPathComponent("couch_local.scn")
-        currentSceneURL = sceneURL
-        
         if FileManager.default.fileExists(atPath: sceneURL.path) {
             // If the file already exists locally, then we shouldn't load the file from Firebase again
-            print("The file exists already!")
+            print("The scene file exists already, so it won't be downloaded from Firebase.")
             return
         }
+        currentSceneURL = sceneURL
         
-        let downloadTask = storageRef.child("models/couch.scn").write(toFile: sceneURL)
-        downloadTask.observe(.success) { snapshot in
-            print("The file was successfully downloaded from Firebase")
+        storageRef.child("models/couch.scn").write(toFile: sceneURL) { (url, error) in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            print("The scene file was successfully downloaded from Firebase!")
         }
     }
     
@@ -160,11 +165,11 @@ extension ARKitViewController {
 // MARK: - Extension: Objective-C Exposed Functions
 extension ARKitViewController {
     
-    @objc func logoutButtonTapped(sender: UIButton!) {
+    @objc private func logoutButtonTapped(sender: UIButton!) {
         self.dismiss(animated: true, completion: nil)
     }
     
-    @objc func handleTap(recognizer: UITapGestureRecognizer) {
+    @objc private func handleTap(recognizer: UITapGestureRecognizer) {
         guard let recognizerView = recognizer.view as? ARSCNView else {
             print("recognizerView was not able to be initialized!")
             return
@@ -180,7 +185,7 @@ extension ARKitViewController {
         sceneView.session.add(anchor: couchAnchor)
     }
     
-    @objc func handlePan(recognizer: UIPanGestureRecognizer) {
+    @objc private func handlePan(recognizer: UIPanGestureRecognizer) {
         guard recognizer.state == .changed else {
             print("recognizer.state is not changed, so we don't need to do anything")
             return
@@ -207,7 +212,7 @@ extension ARKitViewController {
         )
     }
     
-    @objc func handlePinch(recognizer: UIPinchGestureRecognizer) {
+    @objc private func handlePinch(recognizer: UIPinchGestureRecognizer) {
         guard recognizer.state == .changed else {
             print("recognizer.state is not changed, so we don't need to do anything")
             return
@@ -220,15 +225,15 @@ extension ARKitViewController {
             return
         }
         
-        let pinchScaleX: CGFloat = recognizer.scale * CGFloat((modelNodeHit.scale.x))
-        let pinchScaleY: CGFloat = recognizer.scale * CGFloat((modelNodeHit.scale.y))
-        let pinchScaleZ: CGFloat = recognizer.scale * CGFloat((modelNodeHit.scale.z))
+        let pinchScaleX = Float(recognizer.scale * CGFloat((modelNodeHit.scale.x)))
+        let pinchScaleY = Float(recognizer.scale * CGFloat((modelNodeHit.scale.y)))
+        let pinchScaleZ = Float(recognizer.scale * CGFloat((modelNodeHit.scale.z)))
         
-        modelNodeHit.scale = SCNVector3Make(Float(pinchScaleX), Float(pinchScaleY), Float(pinchScaleZ))
+        modelNodeHit.scale = SCNVector3Make(pinchScaleX, pinchScaleY, pinchScaleZ)
         recognizer.scale = 1
     }
     
-    @objc func handleRotation(recognizer: UIRotationGestureRecognizer) {
+    @objc private func handleRotation(recognizer: UIRotationGestureRecognizer) {
         guard let touch = getTouchPoint(from: recognizer),
               let modelNodeHit = getModelNodeHit(from: recognizer, using: touch)
         else {
@@ -241,7 +246,7 @@ extension ARKitViewController {
             let rotation = Float(recognizer.rotation)
             modelNodeHit.eulerAngles.y = currentAngleY - rotation
         default:
-            // for .ended, .cancelled, .failed
+            // for '.ended', '.cancelled', '.failed'
             currentAngleY = modelNodeHit.eulerAngles.y
         }
     }
@@ -252,28 +257,27 @@ extension ARKitViewController {
 extension ARKitViewController: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let rootNode = SCNNode()
-        
         guard anchor.name == "couch" else {
-            return rootNode
+            return nil
         }
         
         guard let sceneURL = currentSceneURL else {
             print("currentSceneURL is nil!")
-            return rootNode
+            return nil
         }
         let couchScene = try? SCNScene(url: sceneURL, options: nil)
         guard let couchNode = couchScene?.rootNode.childNode(withName: "couchModel", recursively: true) else {
             print("couchNode was not able to be initialized!")
-            return rootNode
+            return nil
         }
         
         couchNode.categoryBitMask = BodyType.ObjectModel.rawValue
         couchNode.enumerateChildNodes { (node, _) in
             node.categoryBitMask = BodyType.ObjectModel.rawValue
         }
-        rootNode.addChildNode(couchNode)
         
+        let rootNode = SCNNode()
+        rootNode.addChildNode(couchNode)
         return rootNode
     }
     
@@ -289,7 +293,7 @@ extension ARKitViewController: ARSCNViewDelegate {
 extension ARKitViewController {
     
     // Find the parent node for 3D model
-    func getParentNodeOf(_ nodeFound: SCNNode?) -> SCNNode? {
+    private func getParentNodeOf(_ nodeFound: SCNNode?) -> SCNNode? {
         guard let node = nodeFound else {
             print("nodeFound is nil!")
             return nil
@@ -305,7 +309,7 @@ extension ARKitViewController {
     }
     
     // Get the touch point (CGPoint) from a UIGestureRecognizer
-    func getTouchPoint(from recognizer: UIGestureRecognizer) -> CGPoint? {
+    private func getTouchPoint(from recognizer: UIGestureRecognizer) -> CGPoint? {
         guard let recognizerView = recognizer.view as? ARSCNView else {
             print("recognizerView was not able to be initialized!")
             return nil
@@ -314,7 +318,7 @@ extension ARKitViewController {
     }
     
     // Get the modelNodeHit from a UIGestureRecognizer and a touch point
-    func getModelNodeHit(from recognizer: UIGestureRecognizer, using touchPoint: CGPoint) -> SCNNode? {
+    private func getModelNodeHit(from recognizer: UIGestureRecognizer, using touchPoint: CGPoint) -> SCNNode? {
         let hitTestResult = self.sceneView.hitTest(
             touchPoint,
             options: [SCNHitTestOption.categoryBitMask: BodyType.ObjectModel.rawValue]
