@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4222F3D5A5DD5F5AA61FFB5A /* Pods_Furniture_Visualizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF1B8EA213950730E5B16242 /* Pods_Furniture_Visualizer.framework */; };
 		65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BA239981A2008D8A50 /* AppDelegate.swift */; };
 		65C164BD239981A2008D8A50 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BC239981A2008D8A50 /* SceneDelegate.swift */; };
 		65C164C2239981A2008D8A50 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 65C164C0239981A2008D8A50 /* Main.storyboard */; };
@@ -16,10 +15,10 @@
 		65C164CF2399820E008D8A50 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164CE2399820E008D8A50 /* LoginViewController.swift */; };
 		65C164D1239984FC008D8A50 /* ARKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164D0239984FC008D8A50 /* ARKitViewController.swift */; };
 		65FD43EF2399899800E805E6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 65FD43EE2399899800E805E6 /* GoogleService-Info.plist */; };
+		D3C22580663CD20B6CC5C0A7 /* Pods_Furniture_Visualizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6179AB1A7656F59085B5D84 /* Pods_Furniture_Visualizer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		076DEEE9087D307FD74A4AF8 /* Pods-Furniture Visualizer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.release.xcconfig"; path = "Pods/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.release.xcconfig"; sourceTree = "<group>"; };
 		65C164B7239981A2008D8A50 /* Furniture Visualizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Furniture Visualizer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65C164BA239981A2008D8A50 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65C164BC239981A2008D8A50 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -30,8 +29,9 @@
 		65C164CE2399820E008D8A50 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		65C164D0239984FC008D8A50 /* ARKitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARKitViewController.swift; sourceTree = "<group>"; };
 		65FD43EE2399899800E805E6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		B80CDA96A4AA06E7BBF29793 /* Pods-Furniture Visualizer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.debug.xcconfig"; sourceTree = "<group>"; };
-		DF1B8EA213950730E5B16242 /* Pods_Furniture_Visualizer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Furniture_Visualizer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2E47B3B0454F79929F96650 /* Pods-Furniture Visualizer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.release.xcconfig"; path = "Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.release.xcconfig"; sourceTree = "<group>"; };
+		BFCE534B1C5E2D5B94F4A99C /* Pods-Furniture Visualizer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.debug.xcconfig"; path = "Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.debug.xcconfig"; sourceTree = "<group>"; };
+		D6179AB1A7656F59085B5D84 /* Pods_Furniture_Visualizer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Furniture_Visualizer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,26 +39,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4222F3D5A5DD5F5AA61FFB5A /* Pods_Furniture_Visualizer.framework in Frameworks */,
+				D3C22580663CD20B6CC5C0A7 /* Pods_Furniture_Visualizer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0B1EC110823D15F720247238 /* Pods */ = {
+		0D64F1BB1009EA9B72DC1681 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B80CDA96A4AA06E7BBF29793 /* Pods-Furniture Visualizer.debug.xcconfig */,
-				076DEEE9087D307FD74A4AF8 /* Pods-Furniture Visualizer.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
-		5A0BD88253D03828BA0E1DB5 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				DF1B8EA213950730E5B16242 /* Pods_Furniture_Visualizer.framework */,
+				D6179AB1A7656F59085B5D84 /* Pods_Furniture_Visualizer.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -68,8 +59,8 @@
 			children = (
 				65C164B9239981A2008D8A50 /* Furniture Visualizer */,
 				65C164B8239981A2008D8A50 /* Products */,
-				0B1EC110823D15F720247238 /* Pods */,
-				5A0BD88253D03828BA0E1DB5 /* Frameworks */,
+				FF6D87F7668E8AA79BBDBD5F /* Pods */,
+				0D64F1BB1009EA9B72DC1681 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -97,6 +88,16 @@
 			path = "Furniture Visualizer";
 			sourceTree = "<group>";
 		};
+		FF6D87F7668E8AA79BBDBD5F /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BFCE534B1C5E2D5B94F4A99C /* Pods-Furniture Visualizer.debug.xcconfig */,
+				A2E47B3B0454F79929F96650 /* Pods-Furniture Visualizer.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -104,11 +105,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 65C164CB239981A4008D8A50 /* Build configuration list for PBXNativeTarget "Furniture Visualizer" */;
 			buildPhases = (
-				D4225ACF98B3150D377CE465 /* [CP] Check Pods Manifest.lock */,
+				E3E77116CAC702170DFE73D9 /* [CP] Check Pods Manifest.lock */,
 				65C164B3239981A2008D8A50 /* Sources */,
 				65C164B4239981A2008D8A50 /* Frameworks */,
 				65C164B5239981A2008D8A50 /* Resources */,
-				F26769BBA189FE690112CBC1 /* [CP] Embed Pods Frameworks */,
+				BB5C056BA0BAFCEC46B52598 /* [CP] Embed Pods Frameworks */,
+				7AD1DBA36DFFC4DE832B56B7 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -167,7 +169,41 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D4225ACF98B3150D377CE465 /* [CP] Check Pods Manifest.lock */ = {
+		7AD1DBA36DFFC4DE832B56B7 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BB5C056BA0BAFCEC46B52598 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E3E77116CAC702170DFE73D9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -187,34 +223,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F26769BBA189FE690112CBC1 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
-				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -369,7 +377,7 @@
 		};
 		65C164CC239981A4008D8A50 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B80CDA96A4AA06E7BBF29793 /* Pods-Furniture Visualizer.debug.xcconfig */;
+			baseConfigurationReference = BFCE534B1C5E2D5B94F4A99C /* Pods-Furniture Visualizer.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -388,7 +396,7 @@
 		};
 		65C164CD239981A4008D8A50 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 076DEEE9087D307FD74A4AF8 /* Pods-Furniture Visualizer.release.xcconfig */;
+			baseConfigurationReference = A2E47B3B0454F79929F96650 /* Pods-Furniture Visualizer.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

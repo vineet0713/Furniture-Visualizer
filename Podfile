@@ -9,5 +9,7 @@ target 'Furniture Visualizer' do
   pod 'Firebase/Core'
   pod 'Firebase/Database'
   pod 'Firebase/Storage'
+  pod 'FirebaseUI/Auth'
+  pod 'FirebaseUI/Email'
 
 end

@@ -10,6 +10,7 @@ import UIKit
 import SceneKit
 import ARKit
 import FirebaseStorage
+import FirebaseUI
 
 class ARKitViewController: UIViewController {
     
@@ -166,6 +167,16 @@ extension ARKitViewController {
 extension ARKitViewController {
     
     @objc private func logoutButtonTapped(sender: UIButton!) {
+        guard let authUI = FUIAuth.defaultAuthUI() else {
+            return
+        }
+        do {
+            try authUI.signOut()
+            print("signOut succeeded!")
+        } catch {
+            print("ERROR: signOut failed!")
+        }
+        
         self.dismiss(animated: true, completion: nil)
     }
     

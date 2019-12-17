@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "1100"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "396EA2ADC0859D98F8AAAA903C78FDA7"
+               BlueprintIdentifier = "F179C77486F7820CF17E9750BBA074EE"
                BuildableName = "Pods_Furniture_Visualizer.framework"
                BlueprintName = "Pods-Furniture Visualizer"
                ReferencedContainer = "container:Pods.xcodeproj">
