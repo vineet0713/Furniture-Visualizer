@@ -14,7 +14,7 @@ class LoginViewController: UIViewController {
     // MARK: - Properties
     
     let topLabel = UILabel()
-    let loginButton = UIButton()
+    let loginButton = UIButton(type: .system)
     
     // MARK: - UIViewController Life Cycle Functions
     
@@ -28,24 +28,15 @@ class LoginViewController: UIViewController {
 }
 
 // MARK: - Extension: Setup the UI
+
 extension LoginViewController {
     
     func setupLoginButton() {
         loginButton.titleLabel?.font = UIFont.systemFont(ofSize: 24)
-        let defaultColor = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
-        loginButton.setTitleColor(defaultColor, for: .normal)
         loginButton.setTitle("Login", for: .normal)
         loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         view.addSubview(loginButton)
         addConstraintsToLoginButton()
-    }
-    
-    func addConstraintsToLoginButton() {
-        loginButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            loginButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loginButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
     }
     
     func setupTopLabel() {
@@ -55,6 +46,20 @@ extension LoginViewController {
         topLabel.adjustsFontSizeToFitWidth = true
         view.addSubview(topLabel)
         addConstraintsToTopLabel()
+    }
+    
+}
+
+// MARK: - Add Constraints to UI
+
+extension LoginViewController {
+    
+    func addConstraintsToLoginButton() {
+        loginButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            loginButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loginButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
     
     func addConstraintsToTopLabel() {
@@ -69,9 +74,10 @@ extension LoginViewController {
 }
 
 // MARK: - Extension: Objective-C Exposed Functions
+
 extension LoginViewController {
     
-    @objc func loginButtonTapped(sender: UIButton!) {
+    @objc func loginButtonTapped() {
         guard let authUI = FUIAuth.defaultAuthUI() else {
             return
         }
@@ -83,6 +89,7 @@ extension LoginViewController {
 }
 
 // MARK: - Extension: FUIAuthDelegate Functions
+
 extension LoginViewController: FUIAuthDelegate {
     
     func authUI(_ authUI: FUIAuth, didSignInWith authDataResult: AuthDataResult?, error: Error?) {
@@ -105,7 +112,7 @@ extension LoginViewController: FUIAuthDelegate {
         print(result.user.photoURL ?? "empty photoURL")
         print(result.user.metadata)
         
-        performSegue(withIdentifier: "loginToARKitSegue", sender: self)
+        performSegue(withIdentifier: "LoginToARKitSegue", sender: self)
     }
     
 }

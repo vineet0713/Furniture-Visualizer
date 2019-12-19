@@ -3,10 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		655BA65C23AC03D400871539 /* SelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655BA65B23AC03D400871539 /* SelectionViewController.swift */; };
+		655BA65E23AC040C00871539 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655BA65D23AC040C00871539 /* ProfileViewController.swift */; };
 		65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BA239981A2008D8A50 /* AppDelegate.swift */; };
 		65C164BD239981A2008D8A50 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BC239981A2008D8A50 /* SceneDelegate.swift */; };
 		65C164C2239981A2008D8A50 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 65C164C0239981A2008D8A50 /* Main.storyboard */; };
@@ -19,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		655BA65B23AC03D400871539 /* SelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionViewController.swift; sourceTree = "<group>"; };
+		655BA65D23AC040C00871539 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		65C164B7239981A2008D8A50 /* Furniture Visualizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Furniture Visualizer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65C164BA239981A2008D8A50 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65C164BC239981A2008D8A50 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -80,6 +84,8 @@
 				65C164C0239981A2008D8A50 /* Main.storyboard */,
 				65C164CE2399820E008D8A50 /* LoginViewController.swift */,
 				65C164D0239984FC008D8A50 /* ARKitViewController.swift */,
+				655BA65B23AC03D400871539 /* SelectionViewController.swift */,
+				655BA65D23AC040C00871539 /* ProfileViewController.swift */,
 				65C164C3239981A4008D8A50 /* Assets.xcassets */,
 				65C164C5239981A4008D8A50 /* LaunchScreen.storyboard */,
 				65FD43EE2399899800E805E6 /* GoogleService-Info.plist */,
@@ -94,7 +100,6 @@
 				BFCE534B1C5E2D5B94F4A99C /* Pods-Furniture Visualizer.debug.xcconfig */,
 				A2E47B3B0454F79929F96650 /* Pods-Furniture Visualizer.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -232,6 +237,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				655BA65E23AC040C00871539 /* ProfileViewController.swift in Sources */,
+				655BA65C23AC03D400871539 /* SelectionViewController.swift in Sources */,
 				65C164CF2399820E008D8A50 /* LoginViewController.swift in Sources */,
 				65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */,
 				65C164D1239984FC008D8A50 /* ARKitViewController.swift in Sources */,

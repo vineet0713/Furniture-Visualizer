@@ -17,6 +17,10 @@ class ARKitViewController: UIViewController {
     // MARK: - Properties
     
     var sceneView: ARSCNView!
+    
+    var topStackView = UIStackView()
+    var bottomStackView = UIStackView()
+    
     var currentSceneURL: URL?
     
     enum BodyType: Int {
@@ -29,9 +33,13 @@ class ARKitViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        title = "Furniture AR"
+        
         setupSceneView()
+        setupTopStackView()
+        setupBottomStackView()
+        
         registerGestureRecognizers()
-        setupLogoutButton()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -59,19 +67,19 @@ class ARKitViewController: UIViewController {
 }
 
 // MARK: - Extension: Setup the UI
+
 extension ARKitViewController {
     
-    private func setupSceneView() {
+    func setupSceneView() {
         sceneView = ARSCNView()
         view.addSubview(sceneView)
-        
         addConstraintsToSceneView()
         
         // Set the view's delegate
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
+        // sceneView.showsStatistics = true
         
         // Improves the lighting of the sceneView
         sceneView.autoenablesDefaultLighting = true
@@ -87,47 +95,107 @@ extension ARKitViewController {
         sceneView.scene = scene
     }
     
-    private func addConstraintsToSceneView() {
-        sceneView.translatesAutoresizingMaskIntoConstraints = false
-        sceneView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-        sceneView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
-        sceneView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
-        sceneView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+    func setupTopStackView() {
+        topStackView.axis = .horizontal
+        topStackView.distribution = .fillEqually
+        topStackView.spacing = 5
+        topStackView.setBackgroundColor(UIColor(red: 1, green: 1, blue: 1, alpha: 0.5))
+        
+        let profileButton = UIButton(type: .system)
+        profileButton.setTitle("Profile", for: .normal)
+        profileButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        profileButton.addTarget(self, action: #selector(profileButtonTapped), for: .touchUpInside)
+        topStackView.addArrangedSubview(profileButton)
+        
+        let screenshotButton = UIButton(type: .system)
+        screenshotButton.setTitle("Take Screenshot", for: .normal)
+        screenshotButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        screenshotButton.addTarget(self, action: #selector(screenshotButtonTapped), for: .touchUpInside)
+        topStackView.addArrangedSubview(screenshotButton)
+        
+        view.addSubview(topStackView)
+        addConstraintsToTopStackView()
     }
     
-    private func registerGestureRecognizers() {
+    func setupBottomStackView() {
+        bottomStackView.axis = .horizontal
+        bottomStackView.distribution = .fillEqually
+        bottomStackView.spacing = 5
+        bottomStackView.setBackgroundColor(UIColor(red: 1, green: 1, blue: 1, alpha: 0.5))
+        
+        let selectButton = UIButton(type: .system)
+        selectButton.setTitle("Select Furniture", for: .normal)
+        selectButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        selectButton.addTarget(self, action: #selector(selectButtonTapped), for: .touchUpInside)
+        bottomStackView.addArrangedSubview(selectButton)
+        
+        view.addSubview(bottomStackView)
+        addConstraintsToBottomStackView()
+    }
+    
+    func registerGestureRecognizers() {
         // Add a tap gesture recognizer (for adding models to sceneView)
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        self.sceneView.addGestureRecognizer(tapGestureRecognizer)
+        sceneView.addGestureRecognizer(tapGestureRecognizer)
         
         // Add a pan gesture recognizer (for moving the models)
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        self.sceneView.addGestureRecognizer(panGestureRecognizer)
+        sceneView.addGestureRecognizer(panGestureRecognizer)
         
         // Add a pinch gesture recognizer (for resizing the models)
         let pinchGestureRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch))
-        self.sceneView.addGestureRecognizer(pinchGestureRecognizer)
+        sceneView.addGestureRecognizer(pinchGestureRecognizer)
         
         // Add a rotation gesture recognizer (for rotating the models)
         let rotationGestureRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation))
-        self.sceneView.addGestureRecognizer(rotationGestureRecognizer)
+        sceneView.addGestureRecognizer(rotationGestureRecognizer)
     }
     
-    private func setupLogoutButton() {
-        let logoutButton = UIButton(frame: CGRect(x: 100, y: 100, width: 100, height: 50))
-        let defaultColor = UIColor(red: 0.0, green: 122.0/255.0, blue: 1.0, alpha: 1.0)
-        logoutButton.setTitleColor(defaultColor, for: .normal)
-        logoutButton.setTitle("Logout", for: .normal)
-        logoutButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
-        view.addSubview(logoutButton)
+}
+
+// MARK: - Add Constraints to UI
+
+extension ARKitViewController {
+    
+    func addConstraintsToSceneView() {
+        sceneView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            sceneView.topAnchor.constraint(equalTo: view.topAnchor),
+            sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            sceneView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+    
+    func addConstraintsToTopStackView() {
+        topStackView.translatesAutoresizingMaskIntoConstraints = false
+        let safeArea = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            topStackView.topAnchor.constraint(equalTo: safeArea.topAnchor),
+            topStackView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            topStackView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            topStackView.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    func addConstraintsToBottomStackView() {
+        bottomStackView.translatesAutoresizingMaskIntoConstraints = false
+        let safeArea = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            bottomStackView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            bottomStackView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            bottomStackView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
+            bottomStackView.heightAnchor.constraint(equalToConstant: 50)
+        ])
     }
     
 }
 
 // MARK: - Extension: Firebase
+
 extension ARKitViewController {
     
-    private func loadModelsFromFirebase() {
+    func loadModelsFromFirebase() {
         let storage = Storage.storage()
         let storageRef = storage.reference()
         
@@ -145,12 +213,12 @@ extension ARKitViewController {
         }
         
         let sceneURL = documentsURL.appendingPathComponent("couch_local.scn")
+        currentSceneURL = sceneURL
         if FileManager.default.fileExists(atPath: sceneURL.path) {
             // If the file already exists locally, then we shouldn't load the file from Firebase again
             print("The scene file exists already, so it won't be downloaded from Firebase.")
             return
         }
-        currentSceneURL = sceneURL
         
         storageRef.child("models/couch.scn").write(toFile: sceneURL) { (url, error) in
             if let error = error {
@@ -164,23 +232,27 @@ extension ARKitViewController {
 }
 
 // MARK: - Extension: Objective-C Exposed Functions
+
 extension ARKitViewController {
     
-    @objc private func logoutButtonTapped(sender: UIButton!) {
-        guard let authUI = FUIAuth.defaultAuthUI() else {
-            return
-        }
-        do {
-            try authUI.signOut()
-            print("signOut succeeded!")
-        } catch {
-            print("ERROR: signOut failed!")
-        }
-        
-        self.dismiss(animated: true, completion: nil)
+    @objc func profileButtonTapped() {
+        performSegue(withIdentifier: "ARKitToProfileSegue", sender: self)
     }
     
-    @objc private func handleTap(recognizer: UITapGestureRecognizer) {
+    @objc func screenshotButtonTapped() {
+        // TODO: Save screenshot of the existing scene.
+        let alertTitle = "Nonexistent Feature"
+        let alertMessage = "This feature has not been implemented yet. Stay tuned!"
+        let alert = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func selectButtonTapped() {
+        performSegue(withIdentifier: "ARKitToSelectionSegue", sender: self)
+    }
+    
+    @objc func handleTap(recognizer: UITapGestureRecognizer) {
         guard let recognizerView = recognizer.view as? ARSCNView else {
             print("recognizerView was not able to be initialized!")
             return
@@ -196,7 +268,7 @@ extension ARKitViewController {
         sceneView.session.add(anchor: couchAnchor)
     }
     
-    @objc private func handlePan(recognizer: UIPanGestureRecognizer) {
+    @objc func handlePan(recognizer: UIPanGestureRecognizer) {
         guard recognizer.state == .changed else {
             print("recognizer.state is not changed, so we don't need to do anything")
             return
@@ -209,7 +281,7 @@ extension ARKitViewController {
             return
         }
         
-        let hitTestPlane = self.sceneView.hitTest(touch, types: .existingPlane)
+        let hitTestPlane = sceneView.hitTest(touch, types: .existingPlane)
         guard let planeHit = hitTestPlane.first else {
             print("hitTestPlane.first is nil!")
             return
@@ -223,7 +295,7 @@ extension ARKitViewController {
         )
     }
     
-    @objc private func handlePinch(recognizer: UIPinchGestureRecognizer) {
+    @objc func handlePinch(recognizer: UIPinchGestureRecognizer) {
         guard recognizer.state == .changed else {
             print("recognizer.state is not changed, so we don't need to do anything")
             return
@@ -244,7 +316,7 @@ extension ARKitViewController {
         recognizer.scale = 1
     }
     
-    @objc private func handleRotation(recognizer: UIRotationGestureRecognizer) {
+    @objc func handleRotation(recognizer: UIRotationGestureRecognizer) {
         guard let touch = getTouchPoint(from: recognizer),
               let modelNodeHit = getModelNodeHit(from: recognizer, using: touch)
         else {
@@ -265,6 +337,7 @@ extension ARKitViewController {
 }
 
 // MARK: - Extension: ARSCNViewDelegate Functions
+
 extension ARKitViewController: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
@@ -301,10 +374,11 @@ extension ARKitViewController: ARSCNViewDelegate {
 }
 
 // MARK: - Extension: Helper Functions
+
 extension ARKitViewController {
     
     // Find the parent node for 3D model
-    private func getParentNodeOf(_ nodeFound: SCNNode?) -> SCNNode? {
+    func getParentNodeOf(_ nodeFound: SCNNode?) -> SCNNode? {
         guard let node = nodeFound else {
             print("nodeFound is nil!")
             return nil
@@ -320,7 +394,7 @@ extension ARKitViewController {
     }
     
     // Get the touch point (CGPoint) from a UIGestureRecognizer
-    private func getTouchPoint(from recognizer: UIGestureRecognizer) -> CGPoint? {
+    func getTouchPoint(from recognizer: UIGestureRecognizer) -> CGPoint? {
         guard let recognizerView = recognizer.view as? ARSCNView else {
             print("recognizerView was not able to be initialized!")
             return nil
@@ -329,8 +403,8 @@ extension ARKitViewController {
     }
     
     // Get the modelNodeHit from a UIGestureRecognizer and a touch point
-    private func getModelNodeHit(from recognizer: UIGestureRecognizer, using touchPoint: CGPoint) -> SCNNode? {
-        let hitTestResult = self.sceneView.hitTest(
+    func getModelNodeHit(from recognizer: UIGestureRecognizer, using touchPoint: CGPoint) -> SCNNode? {
+        let hitTestResult = sceneView.hitTest(
             touchPoint,
             options: [SCNHitTestOption.categoryBitMask: BodyType.ObjectModel.rawValue]
         )
@@ -342,4 +416,17 @@ extension ARKitViewController {
         return modelNodeHit
     }
     
+}
+
+// MARK: - Extension: UIStackView
+
+// This extension is used to change the background color of a UIStackView.
+// Source: https://stackoverflow.com/questions/34868344/how-to-change-the-background-color-of-uistackview
+extension UIStackView {
+    func setBackgroundColor(_ color: UIColor) {
+        let subView = UIView(frame: bounds)
+        subView.backgroundColor = color
+        subView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        insertSubview(subView, at: 0)
+    }
 }
