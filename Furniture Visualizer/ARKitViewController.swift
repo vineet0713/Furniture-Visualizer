@@ -18,7 +18,6 @@ class ARKitViewController: UIViewController {
     
     var sceneView: ARSCNView!
     
-    var topStackView = UIStackView()
     var bottomStackView = UIStackView()
     
     var currentSceneURL: URL?
@@ -36,7 +35,7 @@ class ARKitViewController: UIViewController {
         title = "Furniture AR"
         
         setupSceneView()
-        setupTopStackView()
+        setupNavigationBar()
         setupBottomStackView()
         
         registerGestureRecognizers()
@@ -95,26 +94,11 @@ extension ARKitViewController {
         sceneView.scene = scene
     }
     
-    func setupTopStackView() {
-        topStackView.axis = .horizontal
-        topStackView.distribution = .fillEqually
-        topStackView.spacing = 5
-        topStackView.setBackgroundColor(UIColor(red: 1, green: 1, blue: 1, alpha: 0.5))
-        
-        let profileButton = UIButton(type: .system)
-        profileButton.setTitle("Profile", for: .normal)
-        profileButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        profileButton.addTarget(self, action: #selector(profileButtonTapped), for: .touchUpInside)
-        topStackView.addArrangedSubview(profileButton)
-        
-        let screenshotButton = UIButton(type: .system)
-        screenshotButton.setTitle("Take Screenshot", for: .normal)
-        screenshotButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        screenshotButton.addTarget(self, action: #selector(screenshotButtonTapped), for: .touchUpInside)
-        topStackView.addArrangedSubview(screenshotButton)
-        
-        view.addSubview(topStackView)
-        addConstraintsToTopStackView()
+    func setupNavigationBar() {
+        let profileBarButton = UIBarButtonItem(title: "Profile", style: .plain, target: self, action: #selector(profileButtonTapped))
+        navigationItem.leftBarButtonItem = profileBarButton
+        let screenshotBarButton = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(screenshotButtonTapped))
+        navigationItem.rightBarButtonItem = screenshotBarButton
     }
     
     func setupBottomStackView() {
@@ -164,17 +148,6 @@ extension ARKitViewController {
             sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             sceneView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
-    func addConstraintsToTopStackView() {
-        topStackView.translatesAutoresizingMaskIntoConstraints = false
-        let safeArea = view.safeAreaLayoutGuide
-        NSLayoutConstraint.activate([
-            topStackView.topAnchor.constraint(equalTo: safeArea.topAnchor),
-            topStackView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
-            topStackView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
-            topStackView.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
