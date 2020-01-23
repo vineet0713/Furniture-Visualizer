@@ -17,10 +17,10 @@ class ARKitViewController: UIViewController {
     // MARK: - Properties
     
     var sceneView: ARSCNView!
-    
     var bottomStackView = UIStackView()
     
     var currentSceneURL: URL?
+    var canProjectModels = true
     
     enum BodyType: Int {
         case ObjectModel = 2
@@ -61,6 +61,12 @@ class ARKitViewController: UIViewController {
         
         // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        
+        canProjectModels = false
     }
     
 }
@@ -177,11 +183,13 @@ extension ARKitViewController {
             url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         } catch {
             print("An exception was thrown while trying to initialize url!")
+            showAlert(title: "Unable to Save Model", message: "You have run out of disk space, so you cannot save the 3D Model.")
             return
         }
         
         guard let documentsURL = url else {
             print("documentsURL was not able to be initialized!")
+            showAlert(title: "Unable to Save Model", message: "You have run out of disk space, so you cannot save the 3D Model.")
             return
         }
         
@@ -196,6 +204,9 @@ extension ARKitViewController {
         storageRef.child("models/couch.scn").write(toFile: sceneURL) { (url, error) in
             if let error = error {
                 print(error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.showAlert(title: "Unable to Load Model", message: "The 3D furniture model wasn't able to load.")
+                }
                 return
             }
             print("The scene file was successfully downloaded from Firebase!")
@@ -226,6 +237,12 @@ extension ARKitViewController {
     }
     
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
+        guard canProjectModels else {
+            let warning = "Your device is almost out of memory. Therefore, you cannot project any more furniture models."
+            showAlert(title: "Unable to Project Model", message: warning)
+            return
+        }
+        
         guard let recognizerView = recognizer.view as? ARSCNView else {
             print("recognizerView was not able to be initialized!")
             return
@@ -387,6 +404,12 @@ extension ARKitViewController {
             return nil
         }
         return modelNodeHit
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
     
 }
