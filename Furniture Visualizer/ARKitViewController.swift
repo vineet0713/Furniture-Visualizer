@@ -361,6 +361,10 @@ extension ARKitViewController: ARSCNViewDelegate {
         }
     }
     
+    func session(_ session: ARSession, didFailWithError error: Error) {
+        showCameraAccessDeniedAlert()
+    }
+    
 }
 
 // MARK: - Extension: Helper Functions
@@ -410,6 +414,25 @@ extension ARKitViewController {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    func showCameraAccessDeniedAlert() {
+        let message = """
+                This app needs to access the camera in order to help you visualize the furniture.
+                Please go to Settings and allow the app to access the camera.
+        """
+        let alert = UIAlertController(title: "Camera Access Alert", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Go to Settings", style: .default, handler: { (action) in
+            self.openSettings()
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func openSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
+            return
+        }
+        UIApplication.shared.open(settingsURL)
     }
     
 }
