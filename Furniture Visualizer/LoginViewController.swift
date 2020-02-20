@@ -25,6 +25,14 @@ class LoginViewController: UIViewController {
         setupTopLabel()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if let _ = Auth.auth().currentUser {
+            performSegue(withIdentifier: "LoginToARKitSegue", sender: self)
+        }
+    }
+    
 }
 
 // MARK: - Extension: Setup the UI
