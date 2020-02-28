@@ -9,8 +9,6 @@
 import UIKit
 import SceneKit
 import ARKit
-import FirebaseStorage
-import FirebaseUI
 
 class ARKitViewController: UIViewController {
     
@@ -51,8 +49,11 @@ class ARKitViewController: UIViewController {
         // Run the view's session
         sceneView.session.run(configuration)
         
+        // Download couch model
         DispatchQueue.global(qos: .userInitiated).async {
-            self.loadModelsFromFirebase()
+            FirebaseSingleton.shared.loadFromStorage(fileName: "couch", fileExtension: "scn", completion: { (fileURL, error) in
+                self.handleFirebaseResult(fileURL, error)
+            })
         }
     }
     
@@ -166,51 +167,6 @@ extension ARKitViewController {
             bottomStackView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
             bottomStackView.heightAnchor.constraint(equalToConstant: 50)
         ])
-    }
-    
-}
-
-// MARK: - Extension: Firebase
-
-extension ARKitViewController {
-    
-    func loadModelsFromFirebase() {
-        let storage = Storage.storage()
-        let storageRef = storage.reference()
-        
-        var url: URL?
-        do {
-            url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        } catch {
-            print("An exception was thrown while trying to initialize url!")
-            showAlert(title: "Unable to Save Model", message: "You have run out of disk space, so you cannot save the 3D Model.")
-            return
-        }
-        
-        guard let documentsURL = url else {
-            print("documentsURL was not able to be initialized!")
-            showAlert(title: "Unable to Save Model", message: "You have run out of disk space, so you cannot save the 3D Model.")
-            return
-        }
-        
-        let sceneURL = documentsURL.appendingPathComponent("couch_local.scn")
-        currentSceneURL = sceneURL
-        if FileManager.default.fileExists(atPath: sceneURL.path) {
-            // If the file already exists locally, then we shouldn't load the file from Firebase again
-            print("The scene file exists already, so it won't be downloaded from Firebase.")
-            return
-        }
-        
-        storageRef.child("models/couch.scn").write(toFile: sceneURL) { (url, error) in
-            if let error = error {
-                print(error.localizedDescription)
-                DispatchQueue.main.async {
-                    self.showAlert(title: "Unable to Load Model", message: "The 3D furniture model wasn't able to load.")
-                }
-                return
-            }
-            print("The scene file was successfully downloaded from Firebase!")
-        }
     }
     
 }
@@ -433,6 +389,32 @@ extension ARKitViewController {
             return
         }
         UIApplication.shared.open(settingsURL)
+    }
+    
+    func handleFirebaseResult(_ fileURL: URL?, _ error: StorageError?) {
+        currentSceneURL = fileURL
+        guard let error = error else {
+            print("The scene file was successfully downloaded from Firebase!")
+            return
+        }
+        switch error {
+        case .urlError:
+            print("An exception was thrown while trying to initialize url!")
+            showAlert(
+                title: "Unable to Save Model",
+                message: "You have run out of disk space, so you cannot save the 3D Model.")
+        case .documentsUrlError:
+            print("documentsURL was not able to be initialized!")
+            showAlert(
+                title: "Unable to Save Model",
+                message: "You have run out of disk space, so you cannot save the 3D Model.")
+        case .fileAlreadyExistsError:
+            print("The scene file exists already, so it won't be downloaded from Firebase.")
+        case .downloadError:
+            DispatchQueue.main.async {
+                self.showAlert(title: "Unable to Load Model", message: "The 3D furniture model wasn't able to load.")
+            }
+        }
     }
     
 }

@@ -16,7 +16,10 @@
 		65C164C7239981A4008D8A50 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 65C164C5239981A4008D8A50 /* LaunchScreen.storyboard */; };
 		65C164CF2399820E008D8A50 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164CE2399820E008D8A50 /* LoginViewController.swift */; };
 		65C164D1239984FC008D8A50 /* ARKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164D0239984FC008D8A50 /* ARKitViewController.swift */; };
+		65DD6ABF2408719B00132C06 /* FurnitureModelTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DD6ABE2408719B00132C06 /* FurnitureModelTableViewCell.swift */; };
+		65DD6AC32408837A00132C06 /* FirebaseSingleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DD6AC22408837A00132C06 /* FirebaseSingleton.swift */; };
 		65FD43EF2399899800E805E6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 65FD43EE2399899800E805E6 /* GoogleService-Info.plist */; };
+		65FFF72B24089A7E00CCB5E1 /* FurnitureModelMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65FFF72A24089A7E00CCB5E1 /* FurnitureModelMetadata.swift */; };
 		D3C22580663CD20B6CC5C0A7 /* Pods_Furniture_Visualizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6179AB1A7656F59085B5D84 /* Pods_Furniture_Visualizer.framework */; };
 /* End PBXBuildFile section */
 
@@ -32,7 +35,10 @@
 		65C164C8239981A4008D8A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		65C164CE2399820E008D8A50 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		65C164D0239984FC008D8A50 /* ARKitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARKitViewController.swift; sourceTree = "<group>"; };
+		65DD6ABE2408719B00132C06 /* FurnitureModelTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FurnitureModelTableViewCell.swift; sourceTree = "<group>"; };
+		65DD6AC22408837A00132C06 /* FirebaseSingleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseSingleton.swift; sourceTree = "<group>"; };
 		65FD43EE2399899800E805E6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		65FFF72A24089A7E00CCB5E1 /* FurnitureModelMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FurnitureModelMetadata.swift; sourceTree = "<group>"; };
 		A2E47B3B0454F79929F96650 /* Pods-Furniture Visualizer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.release.xcconfig"; path = "Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.release.xcconfig"; sourceTree = "<group>"; };
 		BFCE534B1C5E2D5B94F4A99C /* Pods-Furniture Visualizer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Furniture Visualizer.debug.xcconfig"; path = "Target Support Files/Pods-Furniture Visualizer/Pods-Furniture Visualizer.debug.xcconfig"; sourceTree = "<group>"; };
 		D6179AB1A7656F59085B5D84 /* Pods_Furniture_Visualizer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Furniture_Visualizer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,17 +87,44 @@
 			children = (
 				65C164BA239981A2008D8A50 /* AppDelegate.swift */,
 				65C164BC239981A2008D8A50 /* SceneDelegate.swift */,
+				65DD6AC4240883FB00132C06 /* Model */,
 				65C164C0239981A2008D8A50 /* Main.storyboard */,
-				65C164CE2399820E008D8A50 /* LoginViewController.swift */,
-				65C164D0239984FC008D8A50 /* ARKitViewController.swift */,
-				655BA65B23AC03D400871539 /* SelectionViewController.swift */,
-				655BA65D23AC040C00871539 /* ProfileViewController.swift */,
+				65DD6ABD2408717900132C06 /* View */,
+				65DD6ABA2408713900132C06 /* Controller */,
 				65C164C3239981A4008D8A50 /* Assets.xcassets */,
 				65C164C5239981A4008D8A50 /* LaunchScreen.storyboard */,
 				65FD43EE2399899800E805E6 /* GoogleService-Info.plist */,
 				65C164C8239981A4008D8A50 /* Info.plist */,
 			);
 			path = "Furniture Visualizer";
+			sourceTree = "<group>";
+		};
+		65DD6ABA2408713900132C06 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				65C164CE2399820E008D8A50 /* LoginViewController.swift */,
+				65C164D0239984FC008D8A50 /* ARKitViewController.swift */,
+				655BA65B23AC03D400871539 /* SelectionViewController.swift */,
+				655BA65D23AC040C00871539 /* ProfileViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		65DD6ABD2408717900132C06 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				65DD6ABE2408719B00132C06 /* FurnitureModelTableViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		65DD6AC4240883FB00132C06 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				65DD6AC22408837A00132C06 /* FirebaseSingleton.swift */,
+				65FFF72A24089A7E00CCB5E1 /* FurnitureModelMetadata.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		FF6D87F7668E8AA79BBDBD5F /* Pods */ = {
@@ -243,6 +276,9 @@
 				65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */,
 				65C164D1239984FC008D8A50 /* ARKitViewController.swift in Sources */,
 				65C164BD239981A2008D8A50 /* SceneDelegate.swift in Sources */,
+				65FFF72B24089A7E00CCB5E1 /* FurnitureModelMetadata.swift in Sources */,
+				65DD6AC32408837A00132C06 /* FirebaseSingleton.swift in Sources */,
+				65DD6ABF2408719B00132C06 /* FurnitureModelTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
