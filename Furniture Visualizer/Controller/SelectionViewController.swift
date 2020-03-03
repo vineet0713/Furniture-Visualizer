@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import FirebaseStorage
 
 class SelectionViewController: UIViewController {
     
@@ -47,6 +48,7 @@ extension SelectionViewController {
         tableView = UITableView()
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.separatorInset = UIEdgeInsets.zero
         tableView.register(FurnitureModelTableViewCell.self, forCellReuseIdentifier: CELL_IDENTIFIER)
         view.addSubview(tableView)
         addConstraintsToTableView()
@@ -84,8 +86,34 @@ extension SelectionViewController: UITableViewDataSource {
         }
         
         let data = modelData[indexPath.row]
+        
+        // Get the Image from FireStorage
+        
+        let imgRef = Storage.storage().reference(withPath: "images/\(data.filename).png")
+        
+        imgRef.getData(maxSize: 1 * 1024 * 1024) { imgData, error in
+            if error != nil {
+                // Uh-oh, an error occurred!
+            } else {
+                // Data for "images/island.jpg" is returned
+                cell.modelImageView.image = UIImage(data: imgData!)
+            }
+        }
+        
         cell.titleLabel.text = data.title
         cell.descriptionLabel.text = data.description
+        
+        // Set the Rating Image and Rating Color
+        
+        if (data.rating < 0.5) {
+            cell.ratingImageView.image = UIImage(named: "thumbsup_red")
+            cell.ratingLabel.textColor = .systemRed
+        }
+        else {
+            cell.ratingImageView.image = UIImage(named: "thumbsup_green")
+            cell.ratingLabel.textColor = .systemGreen
+        }
+        
         cell.ratingLabel.text = String(data.rating * 100) + "%"
         
         return cell
@@ -127,5 +155,5 @@ extension SelectionViewController {
             self.tableView.reloadData()
         }
     }
-    
+
 }

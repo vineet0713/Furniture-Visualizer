@@ -63,33 +63,39 @@ extension FurnitureModelTableViewCell {
     func setupLabels() {
         titleLabel.font = titleLabel.font.withSize(20)
         titleLabel.text = SAMPLE_TITLE
-        titleLabel.textColor = .blue
-        descriptionLabel.font = descriptionLabel.font.withSize(20)
+        titleLabel.textColor = .black
+        descriptionLabel.font = descriptionLabel.font.withSize(16)
         descriptionLabel.text = SAMPLE_DESCRIPTION
-        descriptionLabel.textColor = .blue
-        ratingLabel.font = ratingLabel.font.withSize(30)
+        descriptionLabel.textColor = .systemGray
+        ratingLabel.font = ratingLabel.font.withSize(18)
         ratingLabel.text = SAMPLE_RATING
-        ratingLabel.textColor = .blue
     }
     
     func setupRatingStackView() {
         ratingStackView.axis = .horizontal
-        ratingStackView.distribution = .equalSpacing
-        ratingStackView.spacing = 10
+        ratingStackView.distribution = .fillEqually
+        ratingStackView.spacing = 5
+        ratingImageView.bounds = CGRect(x: 0, y: 0, width: 5, height: 5)
+        ratingImageView.contentMode = .scaleAspectFit
         ratingStackView.addArrangedSubview(ratingImageView)
         ratingStackView.addArrangedSubview(ratingLabel)
     }
     
     func setupModelInfoStackView() {
         modelInfoStackView.axis = .vertical
-        modelInfoStackView.distribution = .equalSpacing
-        modelInfoStackView.spacing = 10
+        modelInfoStackView.distribution = .fillEqually
+        modelInfoStackView.spacing = 5
         modelInfoStackView.addArrangedSubview(titleLabel)
         modelInfoStackView.addArrangedSubview(descriptionLabel)
         modelInfoStackView.addArrangedSubview(ratingStackView)
     }
     
     func setupRootStackView() {
+        rootStackView.axis = .horizontal
+        rootStackView.distribution = .fillEqually
+        rootStackView.spacing = 10
+        modelImageView.bounds = CGRect(x: 0, y: 0, width: 250, height: 180)
+        modelImageView.contentMode = .scaleAspectFit
         rootStackView.addArrangedSubview(modelImageView)
         rootStackView.addArrangedSubview(modelInfoStackView)
         contentView.addSubview(rootStackView)
@@ -106,7 +112,7 @@ extension FurnitureModelTableViewCell {
         NSLayoutConstraint.activate([
             rootStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             rootStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: -10),
-            rootStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 10),
+            rootStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
             rootStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
         ])
     }
