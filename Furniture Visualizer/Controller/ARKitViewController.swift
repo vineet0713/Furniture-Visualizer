@@ -19,6 +19,7 @@ class ARKitViewController: UIViewController {
     
     var currentSceneURL: URL?
     var canProjectModels = true
+    var modelFilename: String?
     
     enum BodyType: Int {
         case ObjectModel = 2
@@ -48,13 +49,6 @@ class ARKitViewController: UIViewController {
         
         // Run the view's session
         sceneView.session.run(configuration)
-        
-        // Download couch model
-        DispatchQueue.global(qos: .userInitiated).async {
-            FirebaseSingleton.shared.loadFromStorage(fileName: "couch", fileExtension: "scn", completion: { (fileURL, error) in
-                self.handleFirebaseResult(fileURL, error)
-            })
-        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -199,6 +193,11 @@ extension ARKitViewController {
             return
         }
         
+        guard let modelToProject = modelFilename else {
+            showAlert(title: "Model Not Selected", message: "Please select a model in order to project it.")
+            return
+        }
+        
         guard let recognizerView = recognizer.view as? ARSCNView else {
             print("recognizerView was not able to be initialized!")
             return
@@ -210,8 +209,8 @@ extension ARKitViewController {
             return
         }
         
-        let couchAnchor = ARAnchor(name: "couch", transform: hitTestResult.worldTransform)
-        sceneView.session.add(anchor: couchAnchor)
+        let modelAnchor = ARAnchor(name: modelToProject, transform: hitTestResult.worldTransform)
+        sceneView.session.add(anchor: modelAnchor)
     }
     
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
@@ -282,12 +281,37 @@ extension ARKitViewController {
     
 }
 
+// MARK: - Extension: @IBAction Function
+
+extension ARKitViewController {
+    
+    @IBAction func unwindFromSelection(_ sender: UIStoryboardSegue) {
+        guard let senderVC = sender.source as? SelectionViewController else {
+            return
+        }
+        modelFilename = senderVC.selectedModelFilename
+        
+        // Download furniture model from Firebase
+        DispatchQueue.global(qos: .userInitiated).async {
+            FirebaseSingleton.shared.loadFromStorage(filePath: "models", fileName: senderVC.selectedModelFilename,
+                                                     fileExtension: "scn", completion: { (fileURL, error) in
+                self.handleFirebaseResult(fileURL, error)
+            })
+        }
+    }
+    
+}
+
 // MARK: - Extension: ARSCNViewDelegate Functions
 
 extension ARKitViewController: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        guard anchor.name == "couch" else {
+        guard let modelName = modelFilename else {
+            return nil
+        }
+        
+        guard anchor.name == modelName else {
             return nil
         }
         
@@ -295,19 +319,19 @@ extension ARKitViewController: ARSCNViewDelegate {
             print("currentSceneURL is nil!")
             return nil
         }
-        let couchScene = try? SCNScene(url: sceneURL, options: nil)
-        guard let couchNode = couchScene?.rootNode.childNode(withName: "couchModel", recursively: true) else {
-            print("couchNode was not able to be initialized!")
+        let modelScene = try? SCNScene(url: sceneURL, options: nil)
+        guard let modelNode = modelScene?.rootNode.childNode(withName: "\(modelName)Model", recursively: true) else {
+            print("\(modelName)Node was not able to be initialized!")
             return nil
         }
         
-        couchNode.categoryBitMask = BodyType.ObjectModel.rawValue
-        couchNode.enumerateChildNodes { (node, _) in
+        modelNode.categoryBitMask = BodyType.ObjectModel.rawValue
+        modelNode.enumerateChildNodes { (node, _) in
             node.categoryBitMask = BodyType.ObjectModel.rawValue
         }
         
         let rootNode = SCNNode()
-        rootNode.addChildNode(couchNode)
+        rootNode.addChildNode(modelNode)
         return rootNode
     }
     
@@ -333,7 +357,10 @@ extension ARKitViewController {
             print("nodeFound is nil!")
             return nil
         }
-        if node.name == "couchModel" {
+        guard let modelName = modelFilename else {
+            return nil
+        }
+        if node.name == "\(modelName)Model" {
             return node
         }
         guard let parent = node.parent else {
@@ -408,8 +435,6 @@ extension ARKitViewController {
             showAlert(
                 title: "Unable to Save Model",
                 message: "You have run out of disk space, so you cannot save the 3D Model.")
-        case .fileAlreadyExistsError:
-            print("The scene file exists already, so it won't be downloaded from Firebase.")
         case .downloadError:
             DispatchQueue.main.async {
                 self.showAlert(title: "Unable to Load Model", message: "The 3D furniture model wasn't able to load.")

@@ -13,7 +13,6 @@ import FirebaseDatabase
 enum StorageError {
     case urlError
     case documentsUrlError
-    case fileAlreadyExistsError
     case downloadError
 }
 
@@ -32,7 +31,7 @@ class FirebaseSingleton {
         return Database.database().reference()
     }()
     
-    func loadFromStorage(fileName: String, fileExtension: String,
+    func loadFromStorage(filePath: String, fileName: String, fileExtension: String,
                          completion: @escaping (_ fileURL: URL?, _ error: StorageError?) -> Void) {
         var fileURL: URL!
         
@@ -52,11 +51,11 @@ class FirebaseSingleton {
         fileURL = documentsURL.appendingPathComponent("\(fileName)_local.\(fileExtension)")
         if FileManager.default.fileExists(atPath: fileURL.path) {
             // If the file already exists locally, then we shouldn't load the file from Firebase again
-            completion(fileURL, StorageError.fileAlreadyExistsError)
+            completion(fileURL, nil)
             return
         }
         
-        storageRef.child("models/\(fileName).\(fileExtension)").write(toFile: fileURL) { (url, error) in
+        storageRef.child("\(filePath)/\(fileName).\(fileExtension)").write(toFile: fileURL) { (url, error) in
             if let error = error {
                 print(error.localizedDescription)
                 completion(fileURL, StorageError.downloadError)
@@ -82,4 +81,5 @@ class FirebaseSingleton {
             completion(modelData, nil)
         }
     }
+    
 }

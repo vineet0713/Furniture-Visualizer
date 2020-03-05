@@ -20,6 +20,7 @@ class SelectionViewController: UIViewController {
     
     var tableView: UITableView!
     var modelData: [FurnitureModelMetadata] = []
+    var selectedModelFilename = ""
     
     // MARK: - UIViewController Life Cycle Functions
     
@@ -87,33 +88,14 @@ extension SelectionViewController: UITableViewDataSource {
         
         let data = modelData[indexPath.row]
         
-        // Get the Image from FireStorage
-        
-        let imgRef = Storage.storage().reference(withPath: "images/\(data.filename).png")
-        
-        imgRef.getData(maxSize: 1 * 1024 * 1024) { imgData, error in
-            if error != nil {
-                // Uh-oh, an error occurred!
-            } else {
-                // Data for "images/island.jpg" is returned
-                cell.modelImageView.image = UIImage(data: imgData!)
-            }
-        }
+        cell.modelImageView.image = UIImage(named: "placeholder")
+        cell.modelImageView.downloadImage(with: data.filename)
         
         cell.titleLabel.text = data.title
         cell.descriptionLabel.text = data.description
         
-        // Set the Rating Image and Rating Color
-        
-        if (data.rating < 0.5) {
-            cell.ratingImageView.image = UIImage(named: "thumbsup_red")
-            cell.ratingLabel.textColor = .systemRed
-        }
-        else {
-            cell.ratingImageView.image = UIImage(named: "thumbsup_green")
-            cell.ratingLabel.textColor = .systemGreen
-        }
-        
+        cell.ratingImageView.image = UIImage(named: (data.rating < 0.5) ? "thumbsup_red" : "thumbsup_green")
+        cell.ratingLabel.textColor = (data.rating < 0.5) ? .systemRed : .systemGreen
         cell.ratingLabel.text = String(data.rating * 100) + "%"
         
         return cell
@@ -126,7 +108,8 @@ extension SelectionViewController: UITableViewDataSource {
 extension SelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // TODO: Handle the selection of a furniture model.
+        selectedModelFilename = modelData[indexPath.row].filename
+        performSegue(withIdentifier: "unwindToARKitVC", sender: self)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -145,15 +128,40 @@ extension SelectionViewController {
             return
         }
         for data in dataArray {
-            modelData.append(FurnitureModelMetadata(
+            let metadata = FurnitureModelMetadata(
                 filename: (data["filename"] as? String) ?? "",
                 title: (data["title"] as? String) ?? "",
                 description: (data["description"] as? String) ?? "",
-                rating: (data["rating"] as? Double) ?? 0))
+                rating: (data["rating"] as? Double) ?? 0)
+            modelData.append(metadata)
         }
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
     }
 
+}
+
+// MARK: - Extension for UIImageView
+
+extension UIImageView {
+    
+    func downloadImage(with name: String) {
+        FirebaseSingleton.shared.loadFromStorage(filePath: "images", fileName: name, fileExtension: "png") { (fileURL, error) in
+            guard let imageURL = fileURL else {
+                return
+            }
+            var data: Data?
+            do {
+                data = try Data(contentsOf: imageURL)
+            } catch {
+                print("Image Data was not able to be initialized!")
+            }
+            guard let imageData = data else {
+                return
+            }
+            self.image = UIImage(data: imageData)
+        }
+    }
+    
 }
