@@ -174,12 +174,16 @@ extension ARKitViewController {
     }
     
     @objc func screenshotButtonTapped() {
-        // TODO: Save screenshot of the existing scene.
-        let alertTitle = "Nonexistent Feature"
-        let alertMessage = "This feature has not been implemented yet. Stay tuned!"
-        let alert = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
+        let arScreenshot = sceneView.snapshot()
+        UIImageWriteToSavedPhotosAlbum(arScreenshot, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+    }
+    
+    @objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            showAlert(title: "Unable to Save Screenshot", message: error.localizedDescription)
+        } else {
+            showAlert(title: "Screenshot Saved", message: "A screenshot of the ARKit Scene was saved to your Camera Roll.")
+        }
     }
     
     @objc func selectButtonTapped() {
