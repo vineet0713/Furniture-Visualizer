@@ -179,8 +179,8 @@ extension ARKitViewController {
     }
     
     @objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
-        if let error = error {
-            showAlert(title: "Unable to Save Screenshot", message: error.localizedDescription)
+        if let _ = error {
+            showAlert(title: "Unable to Save Screenshot", message: "Please make sure you allow access to your Photo Library.")
         } else {
             showAlert(title: "Screenshot Saved", message: "A screenshot of the ARKit Scene was saved to your Camera Roll.")
         }
