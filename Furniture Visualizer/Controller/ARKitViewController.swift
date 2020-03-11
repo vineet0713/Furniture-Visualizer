@@ -20,6 +20,7 @@ class ARKitViewController: UIViewController {
     var currentSceneURL: URL?
     var canProjectModels = true
     var modelFilename: String?
+    var projectedModels: [String] = []
     
     enum BodyType: Int {
         case ObjectModel = 2
@@ -96,9 +97,11 @@ extension ARKitViewController {
     }
     
     func setupNavigationBar() {
-        let profileBarButton = UIBarButtonItem(title: "Profile", style: .plain, target: self, action: #selector(profileButtonTapped))
+        let profileBarButton = UIBarButtonItem(title: "Profile", style: .plain, target: self,
+                                               action: #selector(profileButtonTapped))
         navigationItem.leftBarButtonItem = profileBarButton
-        let screenshotBarButton = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(screenshotButtonTapped))
+        let screenshotBarButton = UIBarButtonItem(barButtonSystemItem: .camera, target: self,
+                                                  action: #selector(screenshotButtonTapped))
         navigationItem.rightBarButtonItem = screenshotBarButton
     }
     
@@ -294,6 +297,7 @@ extension ARKitViewController {
             return
         }
         modelFilename = senderVC.selectedModelFilename
+        projectedModels.append("\(senderVC.selectedModelFilename)Model")
         
         // Download furniture model from Firebase
         DispatchQueue.global(qos: .userInitiated).async {
@@ -361,10 +365,10 @@ extension ARKitViewController {
             print("nodeFound is nil!")
             return nil
         }
-        guard let modelName = modelFilename else {
+        guard let nodeName = node.name else {
             return nil
         }
-        if node.name == "\(modelName)Model" {
+        if projectedModels.contains(nodeName) {
             return node
         }
         guard let parent = node.parent else {
