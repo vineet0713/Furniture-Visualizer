@@ -19,7 +19,7 @@ class ARKitViewController: UIViewController {
     
     var currentSceneURL: URL?
     var canProjectModels = true
-    var modelFilename: String?
+    var modelMetadata: FurnitureModelMetadata?
     var projectedModels: [String] = []
     
     enum BodyType: Int {
@@ -117,6 +117,12 @@ extension ARKitViewController {
         selectButton.addTarget(self, action: #selector(selectButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(selectButton)
         
+        let rateButton = UIButton(type: .system)
+        rateButton.setTitle("Rate", for: .normal)
+        rateButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        rateButton.addTarget(self, action: #selector(rateButtonTapped), for: .touchUpInside)
+        bottomStackView.addArrangedSubview(rateButton)
+        
         view.addSubview(bottomStackView)
         addConstraintsToBottomStackView()
     }
@@ -193,6 +199,21 @@ extension ARKitViewController {
         performSegue(withIdentifier: "ARKitToSelectionSegue", sender: self)
     }
     
+    @objc func rateButtonTapped() {
+        guard let modelMetadata = modelMetadata else {
+            return
+        }
+        let alert = UIAlertController(title: "Post a Rating", message: "Please choose a rating.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Thumbs Down", style: .default, handler: { (action) in
+            self.updateRating(type: "thumbs-down", modelMetadata)
+        }))
+        alert.addAction(UIAlertAction(title: "Thumbs Up", style: .default, handler: { (action) in
+            self.updateRating(type: "thumbs-up", modelMetadata)
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     @objc func handleTap(recognizer: UITapGestureRecognizer) {
         guard canProjectModels else {
             let warning = "Your device is almost out of memory. Therefore, you cannot project any more furniture models."
@@ -200,7 +221,7 @@ extension ARKitViewController {
             return
         }
         
-        guard let modelToProject = modelFilename else {
+        guard let modelToProject = modelMetadata?.filename else {
             showAlert(title: "Model Not Selected", message: "Please select a model in order to project it.")
             return
         }
@@ -296,12 +317,15 @@ extension ARKitViewController {
         guard let senderVC = sender.source as? SelectionViewController else {
             return
         }
-        modelFilename = senderVC.selectedModelFilename
-        projectedModels.append("\(senderVC.selectedModelFilename)Model")
+        guard let selectedModel = senderVC.selectedModel else {
+            return
+        }
+        modelMetadata = selectedModel
+        projectedModels.append("\(selectedModel.filename)Model")
         
         // Download furniture model from Firebase
         DispatchQueue.global(qos: .userInitiated).async {
-            FirebaseSingleton.shared.loadFromStorage(filePath: "models", fileName: senderVC.selectedModelFilename,
+            FirebaseSingleton.shared.loadFromStorage(filePath: "models", fileName: selectedModel.filename,
                                                      fileExtension: "scn", completion: { (fileURL, error) in
                 self.handleFirebaseResult(fileURL, error)
             })
@@ -315,7 +339,7 @@ extension ARKitViewController {
 extension ARKitViewController: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        guard let modelName = modelFilename else {
+        guard let modelName = modelMetadata?.filename else {
             return nil
         }
         
@@ -446,6 +470,20 @@ extension ARKitViewController {
         case .downloadError:
             DispatchQueue.main.async {
                 self.showAlert(title: "Unable to Load Model", message: "The 3D furniture model wasn't able to load.")
+            }
+        }
+    }
+    
+    func updateRating(type: String, _ modelMetadata: FurnitureModelMetadata) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let firebasePath = "furnitureModel/\(modelMetadata.id)/\(type)"
+            let updatedRating = modelMetadata.thumbsUp + 1
+            FirebaseSingleton.shared.updateRatingToDatabase(path: firebasePath, newValue: updatedRating) { (error) in
+                if let error = error {
+                    print(error)
+                } else {
+                    self.showAlert(title: "Rating Posted", message: "Your rating was successfully posted for other users to see.")
+                }
             }
         }
     }

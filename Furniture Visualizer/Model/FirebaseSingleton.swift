@@ -18,6 +18,7 @@ enum StorageError {
 
 enum DatabaseError {
     case invalidData
+    case saveFailed
 }
 
 class FirebaseSingleton {
@@ -64,7 +65,7 @@ class FirebaseSingleton {
         }
     }
     
-    func loadFromDatabase(path: String,
+    func loadModelMetadataFromDatabase(path: String,
                           completion: @escaping (_ data: [[String:Any]]?, _ error: DatabaseError?) -> Void) {
         databaseRef.child(path).observeSingleEvent(of: .value) { (snapshot) in
             guard let dataArray = snapshot.value as? [Any] else {
@@ -79,6 +80,17 @@ class FirebaseSingleton {
                 }
             }
             completion(modelData, nil)
+        }
+    }
+    
+    func updateRatingToDatabase(path: String, newValue: Int,
+                          completion: @escaping (_ error: DatabaseError?) -> Void) {
+        databaseRef.child(path).setValue(newValue) { (error, databaseReference) in
+            if let error = error {
+                print(error.localizedDescription)
+                completion(DatabaseError.saveFailed)
+            }
+            completion(nil)
         }
     }
     

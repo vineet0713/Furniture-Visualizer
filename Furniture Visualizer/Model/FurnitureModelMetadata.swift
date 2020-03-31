@@ -9,8 +9,10 @@
 import Foundation
 
 struct FurnitureModelMetadata {
+    let id: Int
     let filename: String
     let title: String
     let description: String
-    let rating: Double
+    let thumbsUp: Int
+    let thumbsDown: Int
 }

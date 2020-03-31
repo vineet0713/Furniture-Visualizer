@@ -19,7 +19,7 @@ class SelectionViewController: UIViewController {
     
     var tableView: UITableView!
     var modelData: [FurnitureModelMetadata] = []
-    var selectedModelFilename = ""
+    var selectedModel: FurnitureModelMetadata?
     
     // MARK: - UIViewController Life Cycle Functions
     
@@ -31,9 +31,13 @@ class SelectionViewController: UIViewController {
         title = "Select Furniture"
         
         setupTableView()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
         // Load the furniture model metadata from Firebase
-        FirebaseSingleton.shared.loadFromDatabase(path: "furnitureModel") { (dataArray, error) in
+        FirebaseSingleton.shared.loadModelMetadataFromDatabase(path: "furnitureModel") { (dataArray, error) in
             self.handleFirebaseResult(dataArray, error)
         }
     }
@@ -93,9 +97,15 @@ extension SelectionViewController: UITableViewDataSource {
         cell.titleLabel.text = data.title
         cell.descriptionLabel.text = data.description
         
-        cell.ratingImageView.image = UIImage(named: (data.rating < 0.5) ? "thumbsup_red" : "thumbsup_green")
-        cell.ratingLabel.textColor = (data.rating < 0.5) ? .systemRed : .systemGreen
-        cell.ratingLabel.text = String(data.rating * 100) + "%"
+        if let rating = calculateRating(thumbsUp: data.thumbsUp, thumbsDown: data.thumbsDown) {
+            cell.ratingImageView.image = UIImage(named: (rating < 0.5) ? "thumbsup_red" : "thumbsup_green")
+            cell.ratingLabel.textColor = (rating < 0.5) ? .systemRed : .systemGreen
+            cell.ratingLabel.text = String(format: "%.2f", rating * 100) + "%"
+        } else {
+            cell.ratingImageView.image = nil
+            cell.ratingLabel.textColor = .black
+            cell.ratingLabel.text = "No Ratings"
+        }
         
         return cell
     }
@@ -107,7 +117,7 @@ extension SelectionViewController: UITableViewDataSource {
 extension SelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedModelFilename = modelData[indexPath.row].filename
+        selectedModel = modelData[indexPath.row]
         performSegue(withIdentifier: "unwindToARKitVC", sender: self)
     }
     
@@ -126,17 +136,27 @@ extension SelectionViewController {
             print("Failed to load from database!")
             return
         }
-        for data in dataArray {
+        for (index, data) in dataArray.enumerated() {
             let metadata = FurnitureModelMetadata(
+                id: index + 1,
                 filename: (data["filename"] as? String) ?? "",
                 title: (data["title"] as? String) ?? "",
                 description: (data["description"] as? String) ?? "",
-                rating: (data["rating"] as? Double) ?? 0)
+                thumbsUp: (data["thumbs-up"] as? Int) ?? 0,
+                thumbsDown: (data["thumbs-down"] as? Int) ?? 0)
             modelData.append(metadata)
         }
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
+    }
+    
+    func calculateRating(thumbsUp: Int, thumbsDown: Int) -> Double? {
+        let total = thumbsUp + thumbsDown
+        if total == 0 {
+            return nil
+        }
+        return Double(thumbsUp) / Double(total)
     }
 
 }
