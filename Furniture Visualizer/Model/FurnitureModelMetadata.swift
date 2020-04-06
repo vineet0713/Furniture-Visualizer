@@ -13,6 +13,6 @@ struct FurnitureModelMetadata {
     let filename: String
     let title: String
     let description: String
-    let thumbsUp: Int
-    let thumbsDown: Int
+    var thumbsUp: Int
+    var thumbsDown: Int
 }

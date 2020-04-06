@@ -203,14 +203,27 @@ extension ARKitViewController {
         guard let modelMetadata = modelMetadata else {
             return
         }
-        let alert = UIAlertController(title: "Post a Rating", message: "Please choose a rating.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Thumbs Down", style: .default, handler: { (action) in
+        let alert = UIAlertController(title: "Rate \(modelMetadata.title)", message: nil, preferredStyle: .alert)
+        if let imageURL = FirebaseSingleton.shared.generateFileURL(for: modelMetadata.filename, using: "png") {
+            var imageData: Data?
+            do {
+                imageData = try Data(contentsOf: imageURL)
+            } catch {
+                print("Image Data was not able to be initialized!")
+            }
+            if let imageData = imageData {
+                alert.addImage(UIImage(data: imageData), maxSize: CGSize(width: 245, height: 300), inset: nil, handler: nil)
+            }
+        }
+        // The width of a UIAlertController is 245.
+        // So if the thumbsdown/thumbsup image width is 85, then the left inset should be (245-85)/2 = 80
+        alert.addImage(UIImage(named: "thumbsdown"), maxSize: CGSize(width: 85, height: 85), inset: 80) { (action) in
             self.updateRating(type: "thumbs-down", modelMetadata)
-        }))
-        alert.addAction(UIAlertAction(title: "Thumbs Up", style: .default, handler: { (action) in
+        }
+        alert.addImage(UIImage(named: "thumbsup_green"), maxSize: CGSize(width: 85, height: 85), inset: 80) { (action) in
             self.updateRating(type: "thumbs-up", modelMetadata)
-        }))
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
     
@@ -462,11 +475,6 @@ extension ARKitViewController {
             showAlert(
                 title: "Unable to Save Model",
                 message: "You have run out of disk space, so you cannot save the 3D Model.")
-        case .documentsUrlError:
-            print("documentsURL was not able to be initialized!")
-            showAlert(
-                title: "Unable to Save Model",
-                message: "You have run out of disk space, so you cannot save the 3D Model.")
         case .downloadError:
             DispatchQueue.main.async {
                 self.showAlert(title: "Unable to Load Model", message: "The 3D furniture model wasn't able to load.")
@@ -477,11 +485,16 @@ extension ARKitViewController {
     func updateRating(type: String, _ modelMetadata: FurnitureModelMetadata) {
         DispatchQueue.global(qos: .userInitiated).async {
             let firebasePath = "furnitureModel/\(modelMetadata.id)/\(type)"
-            let updatedRating = modelMetadata.thumbsUp + 1
+            let updatedRating = (type == "thumbs-up") ? (modelMetadata.thumbsUp + 1) : (modelMetadata.thumbsDown + 1)
             FirebaseSingleton.shared.updateRatingToDatabase(path: firebasePath, newValue: updatedRating) { (error) in
                 if let error = error {
                     print(error)
                 } else {
+                    if (type == "thumbs-up") {
+                        self.modelMetadata?.thumbsUp = updatedRating
+                    } else {
+                        self.modelMetadata?.thumbsDown = updatedRating
+                    }
                     self.showAlert(title: "Rating Posted", message: "Your rating was successfully posted for other users to see.")
                 }
             }
@@ -500,5 +513,57 @@ extension UIStackView {
         subView.backgroundColor = color
         subView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         insertSubview(subView, at: 0)
+    }
+}
+
+// This extension is used to return a scaled image with the specified size.
+// Source: https://www.youtube.com/watch?v=d-tWSeGj5MY
+extension UIImage {
+    func imageWithSize(_ size: CGSize) -> UIImage {
+        var scaledImageRect = CGRect.zero
+        
+        let aspectWidth: CGFloat = size.width / self.size.width
+        let aspectHeight: CGFloat = size.height / self.size.height
+        let aspectRatio: CGFloat = min(aspectWidth, aspectHeight)
+        
+        scaledImageRect.size.width = self.size.width * aspectRatio
+        scaledImageRect.size.height = self.size.height * aspectRatio
+        scaledImageRect.origin.x = (size.width - scaledImageRect.size.width) / 2.0
+        scaledImageRect.origin.y = (size.height - scaledImageRect.size.height) / 2.0
+        
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        
+        self.draw(in: scaledImageRect)
+        
+        let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return scaledImage!
+    }
+}
+
+// This extension is used to add an image to a UIAlertController.
+// Source: https://www.youtube.com/watch?v=d-tWSeGj5MY
+extension UIAlertController {
+    func addImage(_ image: UIImage?, maxSize: CGSize, inset: CGFloat?, handler: ((UIAlertAction) -> Void)?) {
+        guard let image = image else {
+            return
+        }
+        let imageSize = image.size
+        
+        let ratio = (imageSize.width >= imageSize.height)
+            ? (maxSize.width / imageSize.width)
+            : (maxSize.height / imageSize.height)
+        let scaledSize = CGSize(width: imageSize.width * ratio, height: imageSize.height * ratio)
+        var resizedImage = image.imageWithSize(scaledSize)
+        if (imageSize.height >= imageSize.width) {
+            let left = inset ?? ((maxSize.width - resizedImage.size.width) / 2)
+            resizedImage = resizedImage.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: -left, bottom: 0, right: 0))
+        }
+        
+        let imageAction = UIAlertAction(title: "", style: .default, handler: handler)
+        imageAction.isEnabled = (handler != nil)
+        imageAction.setValue(resizedImage.withRenderingMode(.alwaysOriginal), forKey: "image")
+        self.addAction(imageAction)
     }
 }
