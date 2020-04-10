@@ -216,13 +216,15 @@ extension ARKitViewController {
             }
         }
         // The width of a UIAlertController is 245.
-        // So if the thumbsdown/thumbsup image width is 85, then the left inset should be (245-85)/2 = 80
-        alert.addImage(UIImage(named: "thumbsdown"), maxSize: CGSize(width: 85, height: 85), inset: 80) { (action) in
-            self.updateRating(type: "thumbs-down", modelMetadata)
-        }
-        alert.addImage(UIImage(named: "thumbsup_green"), maxSize: CGSize(width: 85, height: 85), inset: 80) { (action) in
+        // So if the thumbsdown/thumbsup image width is 35, then the left inset should be (245-35)/2 = 105
+        alert.addImage(UIImage(named: "thumbsup_green"), maxSize: CGSize(width: 35, height: 35), inset: 105) { (action) in
             self.updateRating(type: "thumbs-up", modelMetadata)
         }
+        
+        alert.addImage(UIImage(named: "thumbsdown"), maxSize: CGSize(width: 35, height: 35), inset: 105) { (action) in
+            self.updateRating(type: "thumbs-down", modelMetadata)
+        }
+        
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }

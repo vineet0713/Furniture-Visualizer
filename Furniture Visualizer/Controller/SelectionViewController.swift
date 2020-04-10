@@ -102,9 +102,9 @@ extension SelectionViewController: UITableViewDataSource {
             cell.ratingLabel.textColor = (rating < 0.5) ? .systemRed : .systemGreen
             cell.ratingLabel.text = String(format: "%.2f", rating * 100) + "%"
         } else {
-            cell.ratingImageView.image = nil
-            cell.ratingLabel.textColor = .black
-            cell.ratingLabel.text = "No Ratings"
+            cell.ratingImageView.image = UIImage(named: "thumbsup_grey")
+            cell.ratingLabel.textColor = .systemGray
+            cell.ratingLabel.text = "N/A"
         }
         
         return cell
