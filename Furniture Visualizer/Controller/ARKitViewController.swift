@@ -112,10 +112,24 @@ extension ARKitViewController {
         bottomStackView.setBackgroundColor(UIColor(red: 1, green: 1, blue: 1, alpha: 0.5))
         
         let selectButton = UIButton(type: .system)
-        selectButton.setTitle("Select Furniture", for: .normal)
+        selectButton.setTitle("Select", for: .normal)
         selectButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         selectButton.addTarget(self, action: #selector(selectButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(selectButton)
+        
+        let saveButton = UIButton(type: .system)
+        saveButton.setImage(UIImage(named: "save"), for: .normal)
+        saveButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25)
+        saveButton.tintColor = .systemGreen
+        // saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        bottomStackView.addArrangedSubview(saveButton)
+        
+        let deleteButton = UIButton(type: .system)
+        deleteButton.setImage(UIImage(named: "clear"), for: .normal)
+        deleteButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25)
+        deleteButton.tintColor = .systemRed
+        deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        bottomStackView.addArrangedSubview(deleteButton)
         
         let rateButton = UIButton(type: .system)
         rateButton.setTitle("Rate", for: .normal)
@@ -197,6 +211,16 @@ extension ARKitViewController {
     
     @objc func selectButtonTapped() {
         performSegue(withIdentifier: "ARKitToSelectionSegue", sender: self)
+    }
+    
+    @objc func deleteButtonTapped() {
+        let message = "Are you sure you want to remove all projected furniture models?"
+        let alert = UIAlertController(title: "Confirm Remove", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "No", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { (action) in
+            self.removeAllNodes()
+        }))
+        self.present(alert, animated: true, completion: nil)
     }
     
     @objc func rateButtonTapped() {
@@ -500,6 +524,12 @@ extension ARKitViewController {
                     self.showAlert(title: "Rating Posted", message: "Your rating was successfully posted for other users to see.")
                 }
             }
+        }
+    }
+    
+    func removeAllNodes() {
+        sceneView.scene.rootNode.enumerateChildNodes { (node, stop) in
+            node.removeFromParentNode()
         }
     }
     
