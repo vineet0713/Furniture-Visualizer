@@ -117,6 +117,12 @@ extension ARKitViewController {
         selectButton.addTarget(self, action: #selector(selectButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(selectButton)
         
+        let deleteButton = UIButton(type: .system)
+        deleteButton.setTitle("Delete", for: .normal)
+        deleteButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        bottomStackView.addArrangedSubview(deleteButton)
+        
         let rateButton = UIButton(type: .system)
         rateButton.setTitle("Rate", for: .normal)
         rateButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
@@ -197,6 +203,16 @@ extension ARKitViewController {
     
     @objc func selectButtonTapped() {
         performSegue(withIdentifier: "ARKitToSelectionSegue", sender: self)
+    }
+    
+    @objc func deleteButtonTapped() {
+        let message = "Are you sure you want to remove all projected furniture models?"
+        let alert = UIAlertController(title: "Confirm Remove", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "No", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { (action) in
+            self.removeAllNodes()
+        }))
+        self.present(alert, animated: true, completion: nil)
     }
     
     @objc func rateButtonTapped() {
@@ -500,6 +516,12 @@ extension ARKitViewController {
                     self.showAlert(title: "Rating Posted", message: "Your rating was successfully posted for other users to see.")
                 }
             }
+        }
+    }
+    
+    func removeAllNodes() {
+        sceneView.scene.rootNode.enumerateChildNodes { (node, stop) in
+            node.removeFromParentNode()
         }
     }
     
