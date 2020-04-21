@@ -48,6 +48,11 @@ class ARKitViewController: UIViewController {
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = .horizontal
         
+        if let worldMapData = retrieveWorldMapData(), let worldMap = unarchive(worldMapData: worldMapData) {
+            print("set initial world map")
+            configuration.initialWorldMap = worldMap
+        }
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -119,13 +124,15 @@ extension ARKitViewController {
         
         let saveButton = UIButton(type: .system)
         saveButton.setImage(UIImage(named: "save"), for: .normal)
+        saveButton.imageView?.contentMode = .scaleAspectFit
         saveButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25)
         saveButton.tintColor = .systemGreen
-        // saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(saveButton)
         
         let deleteButton = UIButton(type: .system)
         deleteButton.setImage(UIImage(named: "clear"), for: .normal)
+        deleteButton.imageView?.contentMode = .scaleAspectFit
         deleteButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25)
         deleteButton.tintColor = .systemRed
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
@@ -211,6 +218,20 @@ extension ARKitViewController {
     
     @objc func selectButtonTapped() {
         performSegue(withIdentifier: "ARKitToSelectionSegue", sender: self)
+    }
+    
+    @objc func saveButtonTapped() {
+        sceneView.session.getCurrentWorldMap { (worldMap, error) in
+            guard let worldMap = worldMap else {
+                return
+            }
+            do {
+                try self.archive(worldMap)
+                print("world map saved!")
+            } catch {
+                print("error saving world map!")
+            }
+        }
     }
     
     @objc func deleteButtonTapped() {
@@ -531,6 +552,38 @@ extension ARKitViewController {
         sceneView.scene.rootNode.enumerateChildNodes { (node, stop) in
             node.removeFromParentNode()
         }
+    }
+    
+}
+
+// MARK: - Extension: ARKit Persistence Functions
+// Source: https://www.appcoda.com/arkit-persistence/
+
+extension ARKitViewController {
+    
+    func getWorldMapURL() throws -> URL {
+        let url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        return url.appendingPathComponent("worldMapURL")
+    }
+    
+    func archive(_ worldMap: ARWorldMap) throws {
+        let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
+        try data.write(to: getWorldMapURL(), options: [.atomic])
+    }
+    
+    func retrieveWorldMapData() -> Data? {
+        do {
+            return try Data(contentsOf: getWorldMapURL())
+        } catch {
+            return nil
+        }
+    }
+    
+    func unarchive(worldMapData data: Data) -> ARWorldMap? {
+        guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
+            return nil
+        }
+        return worldMap
     }
     
 }
