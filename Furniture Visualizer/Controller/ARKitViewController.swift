@@ -21,6 +21,7 @@ class ARKitViewController: UIViewController {
     var canProjectModels = true
     var modelMetadata: FurnitureModelMetadata?
     var projectedModels: [String] = []
+    var sceneIsFullyMapped = false
     
     enum BodyType: Int {
         case ObjectModel = 2
@@ -46,12 +47,12 @@ class ARKitViewController: UIViewController {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = .horizontal
         
-        if let worldMapData = retrieveWorldMapData(), let worldMap = unarchive(worldMapData: worldMapData) {
+        if let worldMap = unarchive() {
             print("set initial world map")
             configuration.initialWorldMap = worldMap
         }
+        configuration.planeDetection = .horizontal
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -83,6 +84,7 @@ extension ARKitViewController {
         
         // Set the view's delegate
         sceneView.delegate = self
+        sceneView.session.delegate = self
         
         // Show statistics such as fps and timing information
         // sceneView.showsStatistics = true
@@ -221,6 +223,9 @@ extension ARKitViewController {
     }
     
     @objc func saveButtonTapped() {
+        guard sceneIsFullyMapped else {
+            return
+        }
         sceneView.session.getCurrentWorldMap { (worldMap, error) in
             guard let worldMap = worldMap else {
                 return
@@ -439,6 +444,21 @@ extension ARKitViewController: ARSCNViewDelegate {
     
 }
 
+// MARK: - Extension: ARSessionDelegate Functions
+
+extension ARKitViewController: ARSessionDelegate {
+    
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        switch frame.worldMappingStatus {
+        case .mapped:
+            sceneIsFullyMapped = true
+        default:
+            sceneIsFullyMapped = false
+        }
+    }
+    
+}
+
 // MARK: - Extension: Helper Functions
 
 extension ARKitViewController {
@@ -561,29 +581,25 @@ extension ARKitViewController {
 
 extension ARKitViewController {
     
-    func getWorldMapURL() throws -> URL {
-        let url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        return url.appendingPathComponent("worldMapURL")
-    }
-    
     func archive(_ worldMap: ARWorldMap) throws {
         let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
-        try data.write(to: getWorldMapURL(), options: [.atomic])
+        
+        // Save the world map data in UserDefaults
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(data, forKey: "box")
+        userDefaults.synchronize()
     }
     
-    func retrieveWorldMapData() -> Data? {
-        do {
-            return try Data(contentsOf: getWorldMapURL())
-        } catch {
+    func unarchive() -> ARWorldMap? {
+        let userDefaults = UserDefaults.standard
+        guard let data = userDefaults.data(forKey: "box") else {
             return nil
         }
-    }
-    
-    func unarchive(worldMapData data: Data) -> ARWorldMap? {
-        guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
+        let unarchivedClasses = [ARWorldMap.classForKeyedUnarchiver()]
+        guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: unarchivedClasses, from: data) else {
             return nil
         }
-        return worldMap
+        return worldMap as? ARWorldMap
     }
     
 }
