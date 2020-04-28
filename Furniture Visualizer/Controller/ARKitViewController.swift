@@ -17,7 +17,7 @@ class ARKitViewController: UIViewController {
     var sceneView: ARSCNView!
     var bottomStackView = UIStackView()
     
-    var currentSceneURL: URL?
+    var modelFilenameToSceneURL: [String: URL] = [:]
     var canProjectModels = true
     var modelMetadata: FurnitureModelMetadata?
     var projectedModels: [String] = []
@@ -46,6 +46,26 @@ class ARKitViewController: UIViewController {
         super.viewWillAppear(animated)
         
         resetTrackingConfiguration()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        guard modelFilenameToSceneURL.count == 0 else {
+            return
+        }
+        guard let worldMap = unarchive() else {
+            return
+        }
+        
+        let message = "There is a previously saved AR scene. Would you like to load it?"
+        let alert = UIAlertController(title: "Load AR Scene", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "No", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action) in
+            self.loadProperties()
+            self.resetTrackingConfiguration(with: worldMap)
+        }))
+        self.present(alert, animated: true, completion: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -121,12 +141,6 @@ extension ARKitViewController {
         saveButton.tintColor = .systemGreen
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(saveButton)
-        
-        let loadButton = UIButton(type: .system)
-        loadButton.setTitle("Load", for: .normal)
-        loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        loadButton.addTarget(self, action: #selector(loadButtonTapped), for: .touchUpInside)
-        bottomStackView.addArrangedSubview(loadButton)
         
         let deleteButton = UIButton(type: .system)
         deleteButton.setImage(UIImage(named: "clear"), for: .normal)
@@ -220,6 +234,7 @@ extension ARKitViewController {
     
     @objc func saveButtonTapped() {
         guard sceneIsFullyMapped else {
+            showAlert(title: "AR Scene Not Mapped", message: "Please pan around your surroundings to fully map the AR scene.")
             return
         }
         sceneView.session.getCurrentWorldMap { (worldMap, error) in
@@ -228,17 +243,12 @@ extension ARKitViewController {
             }
             do {
                 try self.archive(worldMap)
-                self.showAlert(title: "World Map Saved", message: "Current Scene has been saved.")
+                self.saveProperties()
+                self.showAlert(title: "Scene Saved", message: "The current AR scene has been saved.")
             } catch {
                 print("error saving world map!")
             }
         }
-    }
-    
-    @objc func loadButtonTapped() {
-        guard let worldMap = unarchive() else { return }
-        
-        resetTrackingConfiguration(with: worldMap)
     }
     
     @objc func deleteButtonTapped() {
@@ -406,15 +416,11 @@ extension ARKitViewController {
 extension ARKitViewController: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        guard let modelName = modelMetadata?.filename else {
+        guard let modelName = anchor.name else {
             return nil
         }
         
-        guard anchor.name == modelName else {
-            return nil
-        }
-        
-        guard let sceneURL = currentSceneURL else {
+        guard let sceneURL = modelFilenameToSceneURL[modelName] else {
             print("currentSceneURL is nil!")
             return nil
         }
@@ -533,7 +539,10 @@ extension ARKitViewController {
     }
     
     func handleFirebaseResult(_ fileURL: URL?, _ error: StorageError?) {
-        currentSceneURL = fileURL
+        guard let modelMetadata = modelMetadata else {
+            return
+        }
+        modelFilenameToSceneURL[modelMetadata.filename] = fileURL
         guard let error = error else {
             print("The scene file was successfully downloaded from Firebase!")
             return
@@ -584,17 +593,43 @@ extension ARKitViewController {
 extension ARKitViewController {
     
     func archive(_ worldMap: ARWorldMap) throws {
-        let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
+        let userDefaults = UserDefaults.standard
         
         // Save the world map data in UserDefaults
-        let userDefaults = UserDefaults.standard
+        let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
         userDefaults.set(data, forKey: "box")
+        
+        userDefaults.synchronize()
+    }
+    
+    func saveProperties() {
+        let userDefaults = UserDefaults.standard
+        let encoder = JSONEncoder()
+        
+        // Save the modelMetadata struct in UserDefaults
+        guard let encodedMetadata = try? encoder.encode(modelMetadata) else {
+            return
+        }
+        userDefaults.set(encodedMetadata, forKey: "modelMetadata")
+        
+        // Save the keys of dictionary (mapping from a model filename to its scene URL) to UserDefaults
+        guard let encodedModelFilenames = try? encoder.encode(Array(modelFilenameToSceneURL.keys)) else {
+            return
+        }
+        userDefaults.set(encodedModelFilenames, forKey: "modelFilenames")
+        
+        // Save the projectedModels array to UserDefaults
+        guard let encodedProjectedModelsArray = try? encoder.encode(projectedModels) else {
+            return
+        }
+        userDefaults.set(encodedProjectedModelsArray, forKey: "projectedModels")
+        
         userDefaults.synchronize()
     }
     
     func unarchive() -> ARWorldMap? {
-        let userDefaults = UserDefaults.standard
-        guard let data = userDefaults.data(forKey: "box") else {
+        // Loads the world map data from UserDefaults
+        guard let data = UserDefaults.standard.data(forKey: "box") else {
             return nil
         }
         let unarchivedClasses = [ARWorldMap.classForKeyedUnarchiver()]
@@ -604,20 +639,48 @@ extension ARKitViewController {
         return worldMap as? ARWorldMap
     }
     
+    func loadProperties() {
+        let userDefaults = UserDefaults.standard
+        let decoder = JSONDecoder()
+        
+        // Loads the modelMetadata struct from UserDefaults
+        guard let savedMetadata = userDefaults.object(forKey: "modelMetadata") as? Data,
+              let loadedMetadata = try? decoder.decode(FurnitureModelMetadata.self, from: savedMetadata) else {
+            return
+        }
+        modelMetadata = loadedMetadata
+        
+        // Loads the keys of dictionary (mapping from a model filename to its scene URL) from UserDefaults
+        guard let savedDictionaryKeys = userDefaults.object(forKey: "modelFilenames") as? Data,
+            let loadedDictionaryKeys = try? decoder.decode([String].self, from: savedDictionaryKeys) else {
+            return
+        }
+        modelFilenameToSceneURL = [:]
+        for modelFilename in loadedDictionaryKeys {
+            if let sceneUrl = FirebaseSingleton.shared.generateFileURL(for: modelFilename, using: "scn") {
+                modelFilenameToSceneURL[modelFilename] = sceneUrl
+            }
+        }
+        
+        // Loads the projectedModels array from UserDefaults
+        guard let savedArray = userDefaults.object(forKey: "projectedModels") as? Data,
+              let loadedArray = try? decoder.decode([String].self, from: savedArray) else {
+            return
+        }
+        projectedModels = loadedArray
+    }
+    
     func resetTrackingConfiguration(with worldMap: ARWorldMap? = nil) {
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.horizontal]
         
-        let options: ARSession.RunOptions = [.resetTracking, .removeExistingAnchors]
         if let worldMap = worldMap {
             configuration.initialWorldMap = worldMap
-            self.showAlert(title: "Found Saved World Map Saved", message: "Previous Scene has been found.")
+            let options: ARSession.RunOptions = [.resetTracking, .removeExistingAnchors]
+            sceneView.session.run(configuration, options: options)
         } else {
-            print("Move camera around to map your surrounding space.")
+            sceneView.session.run(configuration)
         }
-        
-        sceneView.debugOptions = [.showFeaturePoints]
-        sceneView.session.run(configuration, options: options)
     }
 }
 

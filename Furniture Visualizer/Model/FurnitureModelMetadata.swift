@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct FurnitureModelMetadata {
+struct FurnitureModelMetadata: Codable {
     let id: Int
     let filename: String
     let title: String
