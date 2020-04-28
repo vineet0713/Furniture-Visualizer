@@ -45,7 +45,7 @@ class ARKitViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        resetTrackingConfiguration()
+        resetTrackingConfiguration(with: nil, enableOptions: false)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -63,7 +63,7 @@ class ARKitViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "No", style: .default, handler: nil))
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action) in
             self.loadProperties()
-            self.resetTrackingConfiguration(with: worldMap)
+            self.resetTrackingConfiguration(with: worldMap, enableOptions: true)
         }))
         self.present(alert, animated: true, completion: nil)
     }
@@ -583,6 +583,7 @@ extension ARKitViewController {
         sceneView.scene.rootNode.enumerateChildNodes { (node, stop) in
             node.removeFromParentNode()
         }
+        resetTrackingConfiguration(with: nil, enableOptions: true)
     }
     
 }
@@ -670,12 +671,14 @@ extension ARKitViewController {
         projectedModels = loadedArray
     }
     
-    func resetTrackingConfiguration(with worldMap: ARWorldMap? = nil) {
+    func resetTrackingConfiguration(with worldMap: ARWorldMap?, enableOptions: Bool) {
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.horizontal]
         
         if let worldMap = worldMap {
             configuration.initialWorldMap = worldMap
+        }
+        if enableOptions {
             let options: ARSession.RunOptions = [.resetTracking, .removeExistingAnchors]
             sceneView.session.run(configuration, options: options)
         } else {
