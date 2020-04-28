@@ -45,17 +45,7 @@ class ARKitViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
-        
-        if let worldMap = unarchive() {
-            print("set initial world map")
-            configuration.initialWorldMap = worldMap
-        }
-        configuration.planeDetection = .horizontal
-        
-        // Run the view's session
-        sceneView.session.run(configuration)
+        resetTrackingConfiguration()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -127,15 +117,21 @@ extension ARKitViewController {
         let saveButton = UIButton(type: .system)
         saveButton.setImage(UIImage(named: "save"), for: .normal)
         saveButton.imageView?.contentMode = .scaleAspectFit
-        saveButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25)
+        saveButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 20, bottom: 5, right: 20)
         saveButton.tintColor = .systemGreen
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(saveButton)
         
+        let loadButton = UIButton(type: .system)
+        loadButton.setTitle("Load", for: .normal)
+        loadButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        loadButton.addTarget(self, action: #selector(loadButtonTapped), for: .touchUpInside)
+        bottomStackView.addArrangedSubview(loadButton)
+        
         let deleteButton = UIButton(type: .system)
         deleteButton.setImage(UIImage(named: "clear"), for: .normal)
         deleteButton.imageView?.contentMode = .scaleAspectFit
-        deleteButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25)
+        deleteButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 20, bottom: 5, right: 20)
         deleteButton.tintColor = .systemRed
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
         bottomStackView.addArrangedSubview(deleteButton)
@@ -232,11 +228,17 @@ extension ARKitViewController {
             }
             do {
                 try self.archive(worldMap)
-                print("world map saved!")
+                self.showAlert(title: "World Map Saved", message: "Current Scene has been saved.")
             } catch {
                 print("error saving world map!")
             }
         }
+    }
+    
+    @objc func loadButtonTapped() {
+        guard let worldMap = unarchive() else { return }
+        
+        resetTrackingConfiguration(with: worldMap)
     }
     
     @objc func deleteButtonTapped() {
@@ -602,6 +604,21 @@ extension ARKitViewController {
         return worldMap as? ARWorldMap
     }
     
+    func resetTrackingConfiguration(with worldMap: ARWorldMap? = nil) {
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = [.horizontal]
+        
+        let options: ARSession.RunOptions = [.resetTracking, .removeExistingAnchors]
+        if let worldMap = worldMap {
+            configuration.initialWorldMap = worldMap
+            self.showAlert(title: "Found Saved World Map Saved", message: "Previous Scene has been found.")
+        } else {
+            print("Move camera around to map your surrounding space.")
+        }
+        
+        sceneView.debugOptions = [.showFeaturePoints]
+        sceneView.session.run(configuration, options: options)
+    }
 }
 
 // MARK: - Extension: UIStackView
