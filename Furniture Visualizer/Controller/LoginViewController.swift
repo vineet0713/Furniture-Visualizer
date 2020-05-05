@@ -28,9 +28,12 @@ class LoginViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let _ = Auth.auth().currentUser {
-            performSegue(withIdentifier: "LoginToARKitSegue", sender: self)
+        guard let user = Auth.auth().currentUser else {
+            return
         }
+        
+        saveLoginInformation(user.displayName ?? "empty displayName", user.email ?? "empty email")
+        performSegue(withIdentifier: "LoginToARKitSegue", sender: self)
     }
     
 }
@@ -111,16 +114,22 @@ extension LoginViewController: FUIAuthDelegate {
             return
         }
         
-        print(result.user.uid)
-        print("isEmailVerified: \(result.user.isEmailVerified)")
-        print("isAnonymous: \(result.user.isAnonymous)")
-        print(result.user.displayName ?? "empty displayName")
-        print(result.user.email ?? "empty email")
-        print(result.user.phoneNumber ?? "empty phoneNumber")
-        print(result.user.photoURL ?? "empty photoURL")
-        print(result.user.metadata)
+        saveLoginInformation(result.user.displayName ?? "empty displayName", result.user.email ?? "empty email")
         
         performSegue(withIdentifier: "LoginToARKitSegue", sender: self)
+    }
+    
+}
+
+// MARK: - Helper Function
+
+extension LoginViewController {
+    
+    func saveLoginInformation(_ displayName: String, _ email: String) {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(displayName, forKey: "displayName")
+        userDefaults.set(email, forKey: "email")
+        userDefaults.synchronize()
     }
     
 }

@@ -16,6 +16,9 @@ class FurnitureModelTableViewCell: UITableViewCell {
     let SAMPLE_DESCRIPTION = "description"
     let SAMPLE_RATING = "100%"
     
+    let MODEL_IMAGE_VIEW_WIDTH = CGFloat(250)
+    let MODEL_IMAGE_VIEW_HEIGHT = CGFloat(180)
+
     // MARK: - Properties
     
     let rootStackView = UIStackView()
@@ -94,7 +97,7 @@ extension FurnitureModelTableViewCell {
         rootStackView.axis = .horizontal
         rootStackView.distribution = .fillEqually
         rootStackView.spacing = 10
-        modelImageView.bounds = CGRect(x: 0, y: 0, width: 250, height: 180)
+        modelImageView.bounds = CGRect(x: 0, y: 0, width: MODEL_IMAGE_VIEW_WIDTH, height: MODEL_IMAGE_VIEW_HEIGHT)
         modelImageView.contentMode = .scaleAspectFit
         rootStackView.addArrangedSubview(modelImageView)
         rootStackView.addArrangedSubview(modelInfoStackView)

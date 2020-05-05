@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		652F707F2461F8840084F54C /* ProfileFurnitureModelCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652F707E2461F8840084F54C /* ProfileFurnitureModelCollectionViewCell.swift */; };
 		655BA65C23AC03D400871539 /* SelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655BA65B23AC03D400871539 /* SelectionViewController.swift */; };
 		655BA65E23AC040C00871539 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655BA65D23AC040C00871539 /* ProfileViewController.swift */; };
 		65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C164BA239981A2008D8A50 /* AppDelegate.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		652F707E2461F8840084F54C /* ProfileFurnitureModelCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileFurnitureModelCollectionViewCell.swift; sourceTree = "<group>"; };
 		655BA65B23AC03D400871539 /* SelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionViewController.swift; sourceTree = "<group>"; };
 		655BA65D23AC040C00871539 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		65C164B7239981A2008D8A50 /* Furniture Visualizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Furniture Visualizer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -114,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				65DD6ABE2408719B00132C06 /* FurnitureModelTableViewCell.swift */,
+				652F707E2461F8840084F54C /* ProfileFurnitureModelCollectionViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -275,6 +278,7 @@
 				65C164CF2399820E008D8A50 /* LoginViewController.swift in Sources */,
 				65C164BB239981A2008D8A50 /* AppDelegate.swift in Sources */,
 				65C164D1239984FC008D8A50 /* ARKitViewController.swift in Sources */,
+				652F707F2461F8840084F54C /* ProfileFurnitureModelCollectionViewCell.swift in Sources */,
 				65C164BD239981A2008D8A50 /* SceneDelegate.swift in Sources */,
 				65FFF72B24089A7E00CCB5E1 /* FurnitureModelMetadata.swift in Sources */,
 				65DD6AC32408837A00132C06 /* FirebaseSingleton.swift in Sources */,
