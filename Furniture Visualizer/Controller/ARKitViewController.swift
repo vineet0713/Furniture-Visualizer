@@ -280,11 +280,11 @@ extension ARKitViewController {
         // The width of a UIAlertController is 245.
         // So if the thumbsdown/thumbsup image width is 35, then the left inset should be (245-35)/2 = 105
         alert.addImage(UIImage(named: "thumbsup_green"), maxSize: CGSize(width: 35, height: 35), inset: 105) { (action) in
-            self.updateRating(type: "thumbs-up", modelMetadata)
+            self.updateRating(selectedRating: true, modelMetadata)
         }
         
         alert.addImage(UIImage(named: "thumbsdown"), maxSize: CGSize(width: 35, height: 35), inset: 105) { (action) in
-            self.updateRating(type: "thumbs-down", modelMetadata)
+            self.updateRating(selectedRating: false, modelMetadata)
         }
         
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
@@ -560,19 +560,19 @@ extension ARKitViewController {
         }
     }
     
-    func updateRating(type: String, _ modelMetadata: FurnitureModelMetadata) {
+    func updateRating(selectedRating: Bool, _ modelMetadata: FurnitureModelMetadata) {
+        let userDefaults = UserDefaults.standard
+        guard let userEmail = userDefaults.string(forKey: "email") else {
+            showAlert(title: "Email Required", message: "You need to have a valid email in order to post a rating.")
+            return
+        }
+        let firebaseEmail = getFirebaseString(from: userEmail)
         DispatchQueue.global(qos: .userInitiated).async {
-            let firebasePath = "furnitureModel/\(modelMetadata.id)/\(type)"
-            let updatedRating = (type == "thumbs-up") ? (modelMetadata.thumbsUp + 1) : (modelMetadata.thumbsDown + 1)
-            FirebaseSingleton.shared.updateRatingToDatabase(path: firebasePath, newValue: updatedRating) { (error) in
+            let firebasePath = "furnitureModel/\(modelMetadata.id)/ratings/\(firebaseEmail)"
+            FirebaseSingleton.shared.updateRatingToDatabase(path: firebasePath, newValue: selectedRating) { (error) in
                 if let error = error {
                     print(error)
                 } else {
-                    if (type == "thumbs-up") {
-                        self.modelMetadata?.thumbsUp = updatedRating
-                    } else {
-                        self.modelMetadata?.thumbsDown = updatedRating
-                    }
                     self.showAlert(title: "Rating Posted", message: "Your rating was successfully posted for other users to see.")
                 }
             }
@@ -584,6 +584,10 @@ extension ARKitViewController {
             node.removeFromParentNode()
         }
         resetTrackingConfiguration(with: nil, enableOptions: true)
+    }
+    
+    func getFirebaseString(from str: String) -> String {
+        return str.replacingOccurrences(of: ".", with: ",")
     }
     
 }

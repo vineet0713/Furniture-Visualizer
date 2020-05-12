@@ -84,7 +84,7 @@ class FirebaseSingleton {
         }
     }
     
-    func updateRatingToDatabase(path: String, newValue: Int,
+    func updateRatingToDatabase(path: String, newValue: Bool,
                           completion: @escaping (_ error: DatabaseError?) -> Void) {
         databaseRef.child(path).setValue(newValue) { (error, databaseReference) in
             if let error = error {

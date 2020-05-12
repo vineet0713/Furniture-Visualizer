@@ -23,6 +23,7 @@ class ProfileViewController: UIViewController {
     var emailLabel: UILabel!
     var changePasswordButton: UIButton!
     var collectionView: UICollectionView!
+    var modelData: [FurnitureModelMetadata] = []
     
     // MARK: - UIViewController Life Cycle Functions
     
@@ -42,6 +43,15 @@ class ProfileViewController: UIViewController {
         addConstraintsToEmailLabel()
         addConstraintsToChangePasswordButton()
         addConstraintsToCollectionView()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // Load the furniture model metadata from Firebase
+        FirebaseSingleton.shared.loadModelMetadataFromDatabase(path: "furnitureModel") { (dataArray, error) in
+            self.handleFirebaseResult(dataArray, error)
+        }
     }
     
 }
@@ -136,11 +146,10 @@ extension ProfileViewController {
 
 // MARK: - UICollectionViewDataSource
 
-// TODO: Fetch the correct data for this user and populate the cell.
 extension ProfileViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return modelData.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -148,18 +157,18 @@ extension ProfileViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
+        let data = modelData[indexPath.row]
+        
+        cell.titleLabel.text = data.title
+        
         cell.modelImageView.image = UIImage(named: "placeholder")
-        if indexPath.row % 3 == 0 {
-            cell.titleLabel.text = "Computer Desk"
-            cell.modelImageView.downloadImage(with: "desk")
+        cell.modelImageView.downloadImage(with: data.filename)
+        
+        if data.thumbsUp == 1 {
             cell.ratingImageView.image = UIImage(named: "thumbsup_green")
-        } else if indexPath.row % 3 == 1 {
-            cell.titleLabel.text = "Bed"
-            cell.modelImageView.downloadImage(with: "bed")
-            cell.ratingImageView.image = UIImage(named: "thumbsup_red")
-        } else if indexPath.row % 3 == 2 {
-            cell.titleLabel.text = "Fireplace"
-            cell.modelImageView.downloadImage(with: "fireplace")
+        } else if data.thumbsDown == 1 {
+            cell.ratingImageView.image = UIImage(named: "thumbsdown")
+        } else {
             cell.ratingImageView.image = UIImage(named: "thumbsup_grey")
         }
         
@@ -182,15 +191,23 @@ extension ProfileViewController {
     }
     
     @objc func changePasswordButtonTapped() {
-        let message = "This feature has not been implemented yet. Stay tuned!"
-        let alert = UIAlertController(title: "Nonexistent Feature", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
+        let alert = UIAlertController(title: "Enter New Password", message: nil, preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.isSecureTextEntry = true
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Submit", style: .default, handler: { [unowned alert] _ in
+            guard let newPassword = alert.textFields?[0].text else {
+                return
+            }
+            self.changePassword(to: newPassword)
+        }))
+        self.present(alert, animated: true, completion: nil)
     }
     
 }
 
-// MARK: - Extension: Helper Function
+// MARK: - Extension: Helper Functions
 
 extension ProfileViewController {
     
@@ -206,6 +223,62 @@ extension ProfileViewController {
         }
         
         dismiss(animated: true, completion: nil)
+    }
+    
+    func handleFirebaseResult(_ dataArray: [[String:Any]]?, _ error: DatabaseError?) {
+        guard let dataArray = dataArray else {
+            print("Failed to load from database!")
+            return
+        }
+        let userDefaults = UserDefaults.standard
+        let firebaseEmail = getFirebaseString(from: userDefaults.string(forKey: "email"))
+        for (index, data) in dataArray.enumerated() {
+            var numThumbsUp = 0, numThumbsDown = 0
+            if let userEmail = firebaseEmail {
+                if let ratingsDictionary = data["ratings"] as? [String:Bool], let rating = ratingsDictionary[userEmail] {
+                    if rating {
+                        numThumbsUp = 1
+                    } else {
+                        numThumbsDown = 1
+                    }
+                }
+            }
+            let metadata = FurnitureModelMetadata(
+                id: index + 1,
+                filename: (data["filename"] as? String) ?? "",
+                title: (data["title"] as? String) ?? "",
+                description: (data["description"] as? String) ?? "",
+                thumbsUp: numThumbsUp,
+                thumbsDown: numThumbsDown)
+            modelData.append(metadata)
+        }
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
+    
+    func getFirebaseString(from str: String?) -> String? {
+        return str?.replacingOccurrences(of: ".", with: ",")
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func changePassword(to newPassword: String) {
+        guard let user = Auth.auth().currentUser else {
+            showAlert(title: "Error", message: "There was an error in changing your password.")
+            return
+        }
+        user.updatePassword(to: newPassword) { (error) in
+            if let error = error {
+                self.showAlert(title: "Error", message: error.localizedDescription)
+                return
+            }
+            self.showAlert(title: "Password Changed", message: "Your password was successfully changed!")
+        }
     }
     
 }

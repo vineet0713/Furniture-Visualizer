@@ -137,13 +137,23 @@ extension SelectionViewController {
             return
         }
         for (index, data) in dataArray.enumerated() {
+            var numThumbsUp = 0, numThumbsDown = 0
+            if let ratingsDictionary = data["ratings"] as? [String:Bool] {
+                for rating in Array(ratingsDictionary.values) {
+                    if rating {
+                        numThumbsUp += 1
+                    } else {
+                        numThumbsDown += 1
+                    }
+                }
+            }
             let metadata = FurnitureModelMetadata(
                 id: index + 1,
                 filename: (data["filename"] as? String) ?? "",
                 title: (data["title"] as? String) ?? "",
                 description: (data["description"] as? String) ?? "",
-                thumbsUp: (data["thumbs-up"] as? Int) ?? 0,
-                thumbsDown: (data["thumbs-down"] as? Int) ?? 0)
+                thumbsUp: numThumbsUp,
+                thumbsDown: numThumbsDown)
             modelData.append(metadata)
         }
         DispatchQueue.main.async {
@@ -158,7 +168,7 @@ extension SelectionViewController {
         }
         return Double(thumbsUp) / Double(total)
     }
-
+    
 }
 
 // MARK: - Extension for UIImageView
